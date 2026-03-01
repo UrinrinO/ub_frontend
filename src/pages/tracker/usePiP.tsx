@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { store } from "../../store/store";
@@ -9,7 +8,10 @@ import PiPTimer from "./PiPTimer";
 declare global {
   interface Window {
     documentPictureInPicture?: {
-      requestWindow(options?: { width?: number; height?: number }): Promise<Window>;
+      requestWindow(options?: {
+        width?: number;
+        height?: number;
+      }): Promise<Window>;
     };
   }
 }
@@ -71,7 +73,9 @@ export function usePiP() {
 
     const root = createRoot(container);
     root.render(
-      createElement(Provider, { store }, createElement(PiPTimer)),
+      <Provider store={store}>
+        <PiPTimer />
+      </Provider>,
     );
 
     pipWindowRef.current = pipWin;

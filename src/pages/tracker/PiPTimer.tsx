@@ -44,12 +44,12 @@ export default function PiPTimer() {
     }
   }
 
-  const dotClass =
-    status === "ACTIVE"
-      ? "bg-green-500"
-      : status === "PAUSED"
-        ? "bg-yellow-500"
-        : "bg-black/30";
+  // const dotClass =
+  //   status === "ACTIVE"
+  //     ? "bg-green-500"
+  //     : status === "PAUSED"
+  //       ? "bg-yellow-500"
+  //       : "bg-black/30";
 
   const statusText =
     status === "ACTIVE"
@@ -117,24 +117,15 @@ export default function PiPTimer() {
       {status !== "IDLE" && (
         <div style={{ display: "flex", gap: 8 }}>
           {status === "ACTIVE" ? (
-            <button
-              onClick={handlePause}
-              style={btnStyle("outline")}
-            >
+            <button onClick={handlePause} style={btnStyle("outline")}>
               Pause
             </button>
           ) : (
-            <button
-              onClick={handleResume}
-              style={btnStyle("solid")}
-            >
+            <button onClick={handleResume} style={btnStyle("solid")}>
               Resume
             </button>
           )}
-          <button
-            onClick={handleClockOut}
-            style={btnStyle("ghost")}
-          >
+          <button onClick={handleClockOut} style={btnStyle("ghost")}>
             Clock Out
           </button>
         </div>
@@ -156,6 +147,16 @@ function btnStyle(variant: "solid" | "outline" | "ghost"): React.CSSProperties {
   if (variant === "solid")
     return { ...base, background: "#000", color: "#fff", borderColor: "#000" };
   if (variant === "outline")
-    return { ...base, background: "#fff", color: "#000", borderColor: "rgba(0,0,0,0.6)" };
-  return { ...base, background: "transparent", color: "rgba(0,0,0,0.45)", borderColor: "rgba(0,0,0,0.15)" };
+    return {
+      ...base,
+      background: "#fff",
+      color: "#000",
+      borderColor: "rgba(0,0,0,0.6)",
+    };
+  return {
+    ...base,
+    background: "transparent",
+    color: "rgba(0,0,0,0.45)",
+    borderColor: "rgba(0,0,0,0.15)",
+  };
 }
