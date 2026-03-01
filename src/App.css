@@ -1,0 +1,60 @@
+@config "../tailwind.config.js";
+
+/* Tailwind v4 */
+@import "tailwindcss";
+
+/* ========================================
+   DESIGN TOKENS
+======================================== */
+
+:root {
+  --background: #f5f4f0;
+  --foreground: #0f172a;
+  --accent: #00a3ff;
+}
+
+/* ========================================
+   GLOBAL RESET
+======================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+/* ========================================
+   BASE TYPOGRAPHY
+======================================== */
+
+body {
+  font-family: "DM Sans", sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  line-height: 1.5;
+}
+
+/* ========================================
+   SCROLLBAR (clean engineering feel)
+======================================== */
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #eae7e0;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #00a3ff;
+  border-radius: 4px;
+}
