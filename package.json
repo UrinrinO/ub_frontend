@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.2.11",
+    "@fontsource/dm-sans": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "@reduxjs/toolkit": "^2.11.2",
     "@remixicon/react": "^4.9.0",
     "@tailwindcss/vite": "^4.2.0",
