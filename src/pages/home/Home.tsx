@@ -88,14 +88,16 @@ export default function Home() {
                   custom={2}
                   className="flex items-center gap-8 pt-8 border-t border-black/10"
                 >
-                  {["Azure", "Node.js", "Python", "Docker", "LangChain"].map((t) => (
-                    <span
-                      key={t}
-                      className="font-mono text-sm text-foreground/40 tracking-wide"
-                    >
-                      {t}
-                    </span>
-                  ))}
+                  {["Azure", "Node.js", "Python", "Docker", "LangChain"].map(
+                    (t) => (
+                      <span
+                        key={t}
+                        className="font-mono text-sm text-foreground/40 tracking-wide"
+                      >
+                        {t}
+                      </span>
+                    ),
+                  )}
                 </motion.div>
               </div>
 
@@ -118,7 +120,7 @@ export default function Home() {
 
                 {/* Floating stat card — outside overflow-hidden, bottom-right */}
                 <div className="absolute bottom-10 right-4 bg-white rounded-2xl shadow-xl p-5 w-44">
-                  <p className="font-display text-4xl text-foreground">8+</p>
+                  <p className="font-display text-4xl text-foreground">9+</p>
                   <p className="text-xs text-foreground/60 mt-1 leading-snug">
                     Years building
                     <br />
@@ -225,9 +227,9 @@ export default function Home() {
               </h2>
               <div className="space-y-4 max-w-md">
                 <p className="text-base text-white/70 leading-relaxed">
-                  I build intelligent, full-stack software systems — with 9 years
-                  of experience across AI engineering, backend architecture, and
-                  cloud DevOps.
+                  I build intelligent, full-stack software systems — with 9
+                  years of experience across AI engineering, backend
+                  architecture, and cloud DevOps.
                 </p>
                 <p className="text-base text-white/60 leading-relaxed">
                   My work spans Generative AI and LLMs to scalable web platforms
