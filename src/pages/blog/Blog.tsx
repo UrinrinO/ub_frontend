@@ -1,153 +1,182 @@
 import { useState } from "react";
 import Container from "../../components/layout/Container";
 
-const blogTags = ["All", "Systems", "ML Architecture", "Engineering", "Career"];
+const blogTags = ["All", "AI Engineering", "Machine Learning", "Full-Stack", "DevOps", "Career"];
 
 const featuredPost = {
-  tag: "Systems",
-  title: "Why I Stopped Using Feature Flags for ML Rollouts",
+  tag: "AI Engineering",
+  title: "From Notebooks to Production: Building Enterprise LLM Systems",
   excerpt:
-    "Feature flags work well for software releases, but ML models have a different risk profile. Here's how I moved to graduated deployments, shadow mode, and champion-challenger patterns instead.",
+    "Large language models are powerful in isolation — but deploying them reliably at enterprise scale requires solid engineering. Here's how I think about LLM architecture, persona design, and model lifecycle management.",
   img: "https://picsum.photos/seed/blogfeat/1000/600",
 };
 
 const latestPosts = [
   {
-    tag: "ML Architecture",
-    title: "Building a Real-Time Feature Store at Scale",
+    tags: ["Machine Learning", "Career"],
+    title: "Pulse Waveforms and Disease Detection: An ML Journey",
     excerpt:
-      "Designing for sub-10ms reads, schema governance, and online-offline consistency in high-throughput environments.",
+      "How I built a machine learning classifier for Peripheral Arterial Disease using synthetically generated pulse waveform data — and won a Best Industrial Project award for it.",
     img: "https://picsum.photos/seed/post1/600/400",
   },
   {
-    tag: "Engineering",
-    title: "The Hidden Cost of Model Drift in Production",
+    tags: ["DevOps", "AI Engineering"],
+    title: "Docker, Kubernetes, and the Case for Container-First CI/CD",
     excerpt:
-      "Drift isn't just about accuracy. How to detect, alert, and respond across input, concept, and prediction drift.",
+      "Moving from manual deployment to container-orchestrated pipelines changed everything. Here's the architecture I rely on for production AI workloads.",
     img: "https://picsum.photos/seed/post2/600/400",
   },
   {
-    tag: "Systems",
-    title: "Event-Driven Architecture for ML Pipelines",
+    tags: ["AI Engineering"],
+    title: "Designing AI Personas: Voice, Emotion, and Real-Life Characteristics",
     excerpt:
-      "Moving from batch to streaming unlocks new latency targets — but changes everything about how you test and debug.",
+      "Building LLM-backed systems that behave like real people requires more than a system prompt. A look at my approach to persona design and character grounding.",
     img: "https://picsum.photos/seed/post3/600/400",
   },
   {
-    tag: "Engineering",
-    title: "Designing for Latency: P99 vs Mean",
+    tags: ["Full-Stack", "AI Engineering"],
+    title: "MERN vs Django: Choosing the Right Stack for AI-Backed Systems",
     excerpt:
-      "Optimizing for average latency hides tail risk. Why P99 matters more in production ML and how to measure it.",
+      "After years of building both MERN and Django backends, here's how I decide which to reach for — especially when a Python ML service is part of the picture.",
     img: "https://picsum.photos/seed/post4/600/400",
   },
   {
-    tag: "ML Architecture",
-    title: "MLOps Maturity: From Notebooks to Platforms",
+    tags: ["AI Engineering", "Full-Stack"],
+    title: "Generative AI Meets Power BI: Predictive Stock Management in Practice",
     excerpt:
-      "A practical framework for assessing ML infrastructure across reproducibility, monitoring, and deployment.",
+      "Connecting Generative AI to live Power BI and SQL data streams to drive predictive inventory decisions — architecture, trade-offs, and lessons learned.",
     img: "https://picsum.photos/seed/post5/600/400",
   },
   {
-    tag: "Systems",
-    title: "Infrastructure as Code for ML Systems",
+    tags: ["Career", "AI Engineering"],
+    title: "Why I Went Back to Study AI After 7 Years in Industry",
     excerpt:
-      "Terraform, Pulumi, and the patterns that work (and fail) when your infra needs to understand model versioning.",
+      "Leaving a senior development role to do an MSc in Artificial Intelligence was a risk. Here's what I learned, what I built, and why it was worth it.",
     img: "https://picsum.photos/seed/post6/600/400",
   },
 ];
 
 export default function Blog() {
-  const [activeTag, setActiveTag] = useState("All");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  function toggleTag(tag: string) {
+    if (tag === "All") {
+      setSelectedTags([]);
+      return;
+    }
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  }
+
+  const filteredPosts =
+    selectedTags.length === 0
+      ? latestPosts
+      : latestPosts.filter((p) => p.tags.some((t) => selectedTags.includes(t)));
 
   return (
-    <section className="py-24">
-      <Container>
-        {/* Header */}
-        <div className="space-y-6 mb-10">
-          <h1 className="font-display text-4xl md:text-5xl text-foreground/90">
-            Blog & articles
-          </h1>
-          <div className="flex flex-wrap gap-2">
-            {blogTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setActiveTag(tag)}
-                className={`px-4 py-1.5 rounded-full text-sm border transition ${
-                  activeTag === tag
-                    ? "bg-foreground text-background border-foreground"
-                    : "border-black/20 text-foreground/70 hover:border-black/40"
-                }`}
-              >
-                {tag}
+    <>
+      <section className="py-24">
+        <Container>
+          {/* Header */}
+          <div className="mb-10">
+            <h1 className="font-display text-4xl md:text-5xl text-foreground/90">
+              Blog & articles
+            </h1>
+          </div>
+
+          {/* Featured Post */}
+          <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center">
+            <div className="overflow-hidden rounded-2xl aspect-[3/2] group">
+              <img
+                src={featuredPost.img}
+                alt={featuredPost.title}
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+              />
+            </div>
+            <div className="space-y-4">
+              <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60">
+                {featuredPost.tag}
+              </span>
+              <h2 className="font-display text-3xl text-foreground/90 leading-tight">
+                {featuredPost.title}
+              </h2>
+              <p className="text-sm text-foreground/70 leading-relaxed">
+                {featuredPost.excerpt}
+              </p>
+              <button className="mt-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:bg-foreground/80 transition">
+                Read more
               </button>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* Latest Posts */}
+      <section className="py-24 bg-foreground">
+        <Container>
+          <div className="mb-10">
+            <p className="flex items-center gap-2 text-xs font-mono uppercase text-white/50 mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-white/50 inline-block" />
+              Blog and articles
+            </p>
+            <h2 className="font-display text-4xl text-white/90 mb-6">
+              Latest insights and trends
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {blogTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-4 py-1.5 rounded-full text-sm border transition ${
+                    (tag === "All" && selectedTags.length === 0) ||
+                    (tag !== "All" && selectedTags.includes(tag))
+                      ? "bg-white text-foreground border-white"
+                      : "border-white/20 text-white/70 hover:border-white/40"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {filteredPosts.map((post, i) => (
+              <article
+                key={i}
+                className="rounded-2xl border border-white/10 bg-white overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform duration-300"
+              >
+                <div className="aspect-[4/3] overflow-hidden group">
+                  <img
+                    src={post.img}
+                    alt={post.title}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  />
+                </div>
+                <div className="p-6 space-y-2">
+                  <div className="flex flex-wrap gap-1.5">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <h3 className="font-semibold text-foreground/90 leading-snug">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-foreground/60 leading-relaxed">
+                    {post.excerpt}
+                  </p>
+                </div>
+              </article>
             ))}
           </div>
-        </div>
-
-        {/* Featured Post */}
-        <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center mb-24">
-          <div className="overflow-hidden rounded-2xl aspect-[3/2]">
-            <img
-              src={featuredPost.img}
-              alt={featuredPost.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="space-y-4">
-            <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60">
-              {featuredPost.tag}
-            </span>
-            <h2 className="font-display text-3xl text-foreground/90 leading-tight">
-              {featuredPost.title}
-            </h2>
-            <p className="text-sm text-foreground/70 leading-relaxed">
-              {featuredPost.excerpt}
-            </p>
-            <button className="mt-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:bg-foreground/80 transition">
-              Read more
-            </button>
-          </div>
-        </div>
-
-        {/* Latest Posts */}
-        <div className="mb-8">
-          <p className="flex items-center gap-2 text-xs font-mono uppercase text-foreground/50 mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-foreground/50 inline-block" />
-            Blog and articles
-          </p>
-          <h2 className="font-display text-4xl text-foreground/90">
-            Latest insights and trends
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {latestPosts.map((post, i) => (
-            <article
-              key={i}
-              className="rounded-2xl border border-black/10 bg-white overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform duration-300"
-            >
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={post.img}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6 space-y-2">
-                <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60">
-                  {post.tag}
-                </span>
-                <h3 className="font-semibold text-foreground/90 leading-snug">
-                  {post.title}
-                </h3>
-                <p className="text-sm text-foreground/60 leading-relaxed">
-                  {post.excerpt}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </Container>
-    </section>
+        </Container>
+      </section>
+    </>
   );
 }

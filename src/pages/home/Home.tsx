@@ -4,28 +4,29 @@ import Button from "../../components/ui/Button";
 import { motion } from "framer-motion";
 import { fadeUp, fade } from "../../lib/motion";
 
-import portrait from "../../assets/images/portrait.png";
+import Uri3 from "../../assets/images/Uri3.jpeg";
+import Uri5 from "../../assets/images/Uri5.jpeg";
 
 const homeWorks = [
   {
     tag: "Case Study",
-    title: "Real-Time Risk Scoring Platform",
-    desc: "Streaming ingestion, online features, low-latency serving, drift monitoring.",
-    stack: "Azure • Event Hubs • CI/CD",
+    title: "AI-Powered Inventory Management System",
+    desc: "Generative AI platform for predictive stock management in aviation — consuming Quantum, SQL Server, and Power BI data.",
+    stack: "Python • Azure • Power BI • MERN",
     img: "https://picsum.photos/seed/mlrisk/800/600",
   },
   {
-    tag: "System Design",
-    title: "Feature Store: Online vs Offline",
-    desc: "Designing for consistency, latency, and leakage prevention.",
-    stack: "Stores • Schema • Governance",
+    tag: "Machine Learning",
+    title: "Peripheral Arterial Disease Detector",
+    desc: "ML API for early disease detection using synthetically generated pulse waveform signals.",
+    stack: "Python • Scikit-Learn • TensorFlow",
     img: "https://picsum.photos/seed/featurestore/800/600",
   },
   {
-    tag: "Engineering",
-    title: "ML Observability Dashboard",
-    desc: "End-to-end monitoring for drift, latency, and feature health.",
-    stack: "Grafana • Prometheus • Python",
+    tag: "DevOps",
+    title: "LLM Research Platform",
+    desc: "Container-orchestrated CI/CD for large language model development and persona systems.",
+    stack: "Docker • Kubernetes • Node.js • GitHub Actions",
     img: "https://picsum.photos/seed/mlops/800/600",
   },
 ];
@@ -42,75 +43,150 @@ const sectionReveal = {
 export default function Home() {
   return (
     <>
-      {/* HERO — cream background (default) */}
+      {/* HERO */}
       <section className="overflow-hidden">
-        <Container>
-          {/* Mobile: stacked portrait → text */}
-          <div className="md:hidden flex flex-col items-center gap-8 py-16 text-center">
-            <motion.div initial="hidden" animate="show" variants={fade} custom={1}>
-              <img
-                src={portrait}
-                alt="Portrait of Uri"
-                className="w-48 h-auto object-contain mx-auto"
-              />
-            </motion.div>
+        {/* ── Desktop ── */}
+        <div className="hidden md:flex relative h-[calc(100vh-80px)]">
+          <Container>
+            <div className="flex h-full">
+              {/* Left: text content */}
+              <div className="flex flex-col justify-center gap-10 flex-1 pr-12">
+                <motion.div
+                  initial="hidden"
+                  animate="show"
+                  variants={fadeUp}
+                  className="space-y-8"
+                >
+                  <h1 className="font-display font-[600] text-[clamp(2.5rem,5vw,5.5rem)] leading-[0.96] tracking-tight">
+                    Building at the{" "}
+                    <span className="text-foreground/30">intersection</span> of
+                    systems & intelligence.
+                  </h1>
+                  <p className="text-base text-foreground/60 leading-relaxed max-w-sm">
+                    I design and build AI-powered software systems — from LLM
+                    backends to full-stack platforms, built for production.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-8">
+                    <Button>View Architecture →</Button>
+                    <span className="text-sm text-foreground/60">
+                      or{" "}
+                      <a
+                        href="/contact"
+                        className="text-foreground underline underline-offset-2 hover:opacity-70 transition"
+                      >
+                        Book A Call ↗
+                      </a>
+                    </span>
+                  </div>
+                </motion.div>
+
+                {/* Trust / stack row */}
+                <motion.div
+                  initial="hidden"
+                  animate="show"
+                  variants={fade}
+                  custom={2}
+                  className="flex items-center gap-8 pt-8 border-t border-black/10"
+                >
+                  {["Azure", "Node.js", "Python", "Docker", "LangChain"].map((t) => (
+                    <span
+                      key={t}
+                      className="font-mono text-sm text-foreground/40 tracking-wide"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </motion.div>
+              </div>
+
+              {/* Right: portrait with margin from right and bottom */}
+              <motion.div
+                initial="hidden"
+                animate="show"
+                variants={fade}
+                custom={1}
+                className="relative w-[40%] flex-shrink-0 pt-8 pb-14 pr-8"
+              >
+                {/* Portrait image — rounded, fills padded area */}
+                <div className="relative h-full rounded-3xl overflow-hidden">
+                  <img
+                    src={Uri3}
+                    alt="Portrait of Uri"
+                    className="w-full h-full object-cover object-top"
+                  />
+                </div>
+
+                {/* Floating stat card — outside overflow-hidden, bottom-right */}
+                <div className="absolute bottom-10 right-4 bg-white rounded-2xl shadow-xl p-5 w-44">
+                  <p className="font-display text-4xl text-foreground">8+</p>
+                  <p className="text-xs text-foreground/60 mt-1 leading-snug">
+                    Years building
+                    <br />
+                    production systems
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+          </Container>
+
+          {/* Vertical scroll indicator */}
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3">
+            <span className="text-[10px] tracking-[0.3em] text-foreground/30 font-mono uppercase [writing-mode:vertical-rl]">
+              Scroll
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
+          </div>
+        </div>
+
+        {/* ── Mobile ── */}
+        <div className="md:hidden">
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={fade}
+            className="relative h-80 overflow-hidden"
+          >
+            <img
+              src={Uri3}
+              alt="Portrait of Uri"
+              className="w-full h-full object-cover object-top"
+            />
+          </motion.div>
+          <div className="px-4 pt-10 pb-16 space-y-8 text-center">
+            <motion.h1
+              initial="hidden"
+              animate="show"
+              variants={fadeUp}
+              className="font-display font-[600] text-[clamp(2.2rem,8vw,3.5rem)] leading-[1.0] tracking-tight"
+            >
+              Building at the{" "}
+              <span className="text-foreground/30">intersection</span> of
+              systems & intelligence.
+            </motion.h1>
+            <motion.p
+              initial="hidden"
+              animate="show"
+              variants={fadeUp}
+              className="text-base text-foreground/60 leading-relaxed"
+            >
+              I design and build AI-powered software systems — from LLM backends
+              to full-stack platforms, built for production.
+            </motion.p>
             <motion.div
               initial="hidden"
               animate="show"
               variants={fadeUp}
-              className="space-y-8"
+              className="flex flex-wrap gap-4 justify-center"
             >
-              <h1 className="font-display font-[600] text-[clamp(2rem,8vw,3.5rem)] leading-[1.0] tracking-tight">
-                Building at the{" "}
-                <span className="text-black/40">intersection</span> of systems &
-                intelligence.
-              </h1>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Button>View ML Platform Architecture →</Button>
-                <Button variant="secondary">Read Engineering Notes →</Button>
-              </div>
+              <Button>View Architecture →</Button>
+              <Button variant="secondary">Book A Call →</Button>
             </motion.div>
           </div>
-
-          {/* Desktop: overlapping absolute layout */}
-          <div className="hidden md:block relative h-[calc(100vh-80px)]">
-            <motion.div
-              initial="hidden"
-              animate="show"
-              variants={fade}
-              custom={1}
-              className="absolute right-0 bottom-0 w-[44%] z-10"
-            >
-              <img
-                src={portrait}
-                alt="Portrait of Uri"
-                className="w-full h-auto object-contain"
-              />
-            </motion.div>
-
-            <motion.div
-              initial="hidden"
-              animate="show"
-              variants={fadeUp}
-              className="relative z-20 w-[68%] h-full flex flex-col justify-end pb-24 space-y-10"
-            >
-              <h1 className="font-display font-[600] text-[clamp(2.5rem,6vw,6.5rem)] leading-[0.98] tracking-tight">
-                Building at the{" "}
-                <span className="text-black/40">intersection</span> of systems &
-                intelligence.
-              </h1>
-
-              <div className="flex flex-wrap gap-4">
-                <Button>View ML Platform Architecture →</Button>
-                <Button variant="secondary">Read Engineering Notes →</Button>
-              </div>
-            </motion.div>
-          </div>
-        </Container>
+        </div>
       </section>
 
       {/* ABOUT — warm intermediate between hero and selected works */}
-      <section className="py-24 bg-[#eeede9] border-t border-black/5">
+      <section className="py-24 bg-foreground border-t border-white/5">
         <Container>
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left: image — above text on mobile, left on desktop; grayscale until hover */}
@@ -123,7 +199,7 @@ export default function Home() {
               className="rounded-3xl overflow-hidden aspect-[3/4] group order-last md:order-first"
             >
               <img
-                src="https://picsum.photos/seed/about-portrait/600/800"
+                src={Uri5}
                 alt="About Uri"
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               />
@@ -137,29 +213,30 @@ export default function Home() {
               variants={fadeUp}
               className="space-y-6 order-first md:order-last"
             >
-              <p className="font-mono text-xs tracking-widest uppercase text-accent">
+              <p className="font-mono text-xs tracking-widest uppercase text-white/50">
                 About me
               </p>
-              <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.0] tracking-tight text-foreground/90">
+              <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.0] tracking-tight text-white/90">
                 Engineer.
                 <br />
                 Builder.
                 <br />
-                <span className="text-foreground/30">Systems thinker.</span>
+                <span className="text-white/30">Systems thinker.</span>
               </h2>
               <div className="space-y-4 max-w-md">
-                <p className="text-base text-foreground/70 leading-relaxed">
-                  I build reliable machine learning systems with a focus on
-                  infrastructure, observability, and long-term maintainability.
+                <p className="text-base text-white/70 leading-relaxed">
+                  I build intelligent, full-stack software systems — with 9 years
+                  of experience across AI engineering, backend architecture, and
+                  cloud DevOps.
                 </p>
-                <p className="text-base text-foreground/60 leading-relaxed">
-                  My work blends backend engineering with applied ML to ship
-                  scalable, production-safe platforms.
+                <p className="text-base text-white/60 leading-relaxed">
+                  My work spans Generative AI and LLMs to scalable web platforms
+                  — engineering solutions that are reliable and built to evolve.
                 </p>
               </div>
               <a
                 href="/about"
-                className="inline-block px-6 py-3 rounded-full bg-foreground text-background text-sm hover:bg-foreground/80 transition"
+                className="inline-block px-6 py-3 rounded-full bg-white text-foreground text-sm hover:bg-white/90 transition"
               >
                 Read more →
               </a>
@@ -191,8 +268,8 @@ export default function Home() {
               </div>
               {/* Right: description, baseline-aligned with heading */}
               <p className="text-base text-foreground/60 leading-relaxed max-w-sm">
-                Production systems at the intersection of engineering rigour
-                and applied ML — built to be observable, scalable, and safe to
+                Production systems at the intersection of engineering rigour and
+                applied ML — built to be observable, scalable, and safe to
                 evolve.
               </p>
             </div>
