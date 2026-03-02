@@ -66,15 +66,43 @@ export default function Home() {
   return (
     <>
       {/* HERO */}
-      <section className="relative h-[calc(100vh-80px)] overflow-hidden">
+      <section className="overflow-hidden">
         <Container>
-          <div className="relative h-full">
+          {/* Mobile: stacked portrait → text */}
+          <div className="md:hidden flex flex-col items-center gap-8 py-16 text-center">
+            <motion.div initial="hidden" animate="show" variants={fade} custom={1}>
+              <img
+                src={portrait}
+                alt="Portrait of Uri"
+                className="w-48 h-auto object-contain mx-auto"
+              />
+            </motion.div>
+            <motion.div
+              initial="hidden"
+              animate="show"
+              variants={fadeUp}
+              className="space-y-8"
+            >
+              <h1 className="font-display font-[600] text-[clamp(2rem,8vw,3.5rem)] leading-[1.0] tracking-tight">
+                Building at the{" "}
+                <span className="text-black/40">intersection</span> of systems &
+                intelligence.
+              </h1>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button>View ML Platform Architecture →</Button>
+                <Button variant="secondary">Read Engineering Notes →</Button>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Desktop: overlapping absolute layout */}
+          <div className="hidden md:block relative h-[calc(100vh-80px)]">
             <motion.div
               initial="hidden"
               animate="show"
               variants={fade}
               custom={1}
-              className="absolute right-0 bottom-0 w-[52%] z-10"
+              className="absolute right-0 bottom-0 w-[44%] z-10"
             >
               <img
                 src={portrait}
@@ -176,7 +204,7 @@ export default function Home() {
               </p>
 
               <img
-                src={portrait}
+                src="https://picsum.photos/seed/portrait-card/400/300"
                 alt="Profile"
                 className="w-full rounded-xl object-cover"
               />
@@ -186,9 +214,9 @@ export default function Home() {
               {/* portrait thumbnail */}
               <div className="relative w-24 h-24">
                 <img
-                  src={portrait}
+                  src="https://picsum.photos/seed/portrait-thumb/200/200"
                   alt="Uri"
-                  className="w-full h-full rounded-2xl object-cover object-top"
+                  className="w-full h-full rounded-2xl object-cover object-center"
                 />
                 <span className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold">
                   ↗
@@ -243,7 +271,36 @@ export default function Home() {
             </a>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="flex gap-3 h-[460px]">
+          {/* Mobile: vertical stack */}
+          <div className="md:hidden space-y-4">
+            {homeWorks.map((work, i) => (
+              <div key={i} className="relative overflow-hidden rounded-2xl h-52">
+                <img
+                  src={work.img}
+                  alt={work.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+                  <p className="font-mono text-xs uppercase tracking-wider text-white/60">
+                    {work.tag}
+                  </p>
+                  <h4 className="font-display text-xl mt-1 leading-tight">
+                    {work.title}
+                  </h4>
+                  <p className="text-sm mt-1.5 text-white/70 leading-relaxed">
+                    {work.desc}
+                  </p>
+                  <p className="font-mono text-xs mt-2 text-white/40">
+                    {work.stack}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: accordion flex */}
+          <motion.div variants={fadeUp} className="hidden md:flex gap-3 h-[460px]">
             {homeWorks.map((work, i) => (
               <div
                 key={i}

@@ -64,7 +64,7 @@ export default function Blog() {
       <Container>
         {/* Header */}
         <div className="space-y-6 mb-10">
-          <h1 className="font-display text-5xl text-foreground/90">
+          <h1 className="font-display text-4xl md:text-5xl text-foreground/90">
             Blog & articles
           </h1>
           <div className="flex flex-wrap gap-2">

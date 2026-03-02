@@ -57,7 +57,7 @@ export default function About() {
       {/* HERO */}
       <section className="py-24">
         <Container>
-          <div className="max-w-[80%]">
+          <div className="max-w-full md:max-w-[80%]">
             <div className="space-y-8">
               <h1 className="font-display text-[clamp(3rem,6vw,5.5rem)] leading-[0.96] tracking-tight text-foreground/90">
                 Engineer.
