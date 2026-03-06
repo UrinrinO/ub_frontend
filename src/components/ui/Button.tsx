@@ -10,7 +10,7 @@ export default function Button({ children, variant = "primary" }: Props) {
 
   const styles =
     variant === "primary"
-      ? "bg-accent text-black hover:opacity-90"
+      ? "bg-foreground text-white hover:opacity-90"
       : "border border-foreground hover:bg-white hover:text-black";
 
   return <button className={`${base} ${styles}`}>{children}</button>;

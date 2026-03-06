@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useToast } from "../../components/ui/Toast";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { store } from "../../store/store";
@@ -41,12 +42,11 @@ function copyStylesToWindow(target: Window) {
 export function usePiP() {
   const pipWindowRef = useRef<Window | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const toast = useToast();
 
   const open = useCallback(async () => {
     if (!window.documentPictureInPicture) {
-      alert(
-        "Picture-in-Picture is not supported in this browser.\nUse Chrome 116+ or Edge 116+.",
-      );
+      toast.warning("Picture-in-Picture is not supported. Use Chrome 116+ or Edge 116+.");
       return;
     }
 

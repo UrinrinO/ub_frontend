@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useToast } from "../../components/ui/Toast";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "../../store/store";
 import {
@@ -48,6 +49,7 @@ export default function Tracker() {
     useState<Category>("ALGORITHMS");
 
   const { openPiP, isPiPOpen } = usePiP();
+  const toast = useToast();
 
   const running = status === "ACTIVE";
 
@@ -126,7 +128,7 @@ export default function Tracker() {
       dispatch(clockedIn(selectedCategory));
     } catch (e) {
       console.error(e);
-      alert(String(e));
+      toast.error(String(e));
     }
   }
 
@@ -136,7 +138,7 @@ export default function Tracker() {
       dispatch(paused());
     } catch (e) {
       console.error(e);
-      alert(String(e));
+      toast.error(String(e));
     }
   }
 
@@ -146,7 +148,7 @@ export default function Tracker() {
       dispatch(resumed());
     } catch (e) {
       console.error(e);
-      alert(String(e));
+      toast.error(String(e));
     }
   }
 
@@ -158,7 +160,7 @@ export default function Tracker() {
       dispatch(clockOutOpened());
     } catch (e) {
       console.error(e);
-      alert(String(e));
+      toast.error(String(e));
     }
   }
 

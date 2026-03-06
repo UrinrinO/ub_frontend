@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useToast } from "../../components/ui/Toast";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import { reset, clockOutFormClosed, weekLoaded } from "../../store/trackerSlice";
@@ -54,6 +55,7 @@ export default function ClockOutForm({ seconds, minMinutes = 25 }: Props) {
   const [focus, setFocus] = useState(3);
   const [saving, setSaving] = useState(false);
   const [showAbandonConfirm, setShowAbandonConfirm] = useState(false);
+  const toast = useToast();
 
   const elapsedMinutes = Math.floor(seconds / 60);
   const remainingMinutes = Math.max(0, minMinutes - elapsedMinutes);
@@ -68,7 +70,7 @@ export default function ClockOutForm({ seconds, minMinutes = 25 }: Props) {
       dispatch(weekLoaded(week));
       dispatch(reset());
     } catch (e) {
-      alert(String(e));
+      toast.error(String(e));
     } finally {
       setSaving(false);
     }
@@ -81,7 +83,7 @@ export default function ClockOutForm({ seconds, minMinutes = 25 }: Props) {
       dispatch(weekLoaded(week));
       dispatch(reset());
     } catch (e) {
-      alert(String(e));
+      toast.error(String(e));
     }
   }
 

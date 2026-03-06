@@ -1,73 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Container from "../../components/layout/Container";
+import { projectsApi, type Project } from "../../lib/adminApi";
 
 const projectTags = ["All", "Case Studies", "Machine Learning", "Full-Stack", "DevOps"];
 
-const featuredProject = {
-  tag: "Case Study",
-  title: "AI-Powered Smart Inventory Management System",
-  excerpt:
-    "A Generative AI–integrated inventory platform built for the aviation sector. Consumes live data from Quantum, SQL Server, and Power BI for predictive stock management — built on a MERN stack with a Python AI backend deployed on Azure.",
-  img: "https://picsum.photos/seed/projfeat/1000/600",
-};
-
-const moreProjects = [
-  {
-    tags: ["Machine Learning", "Case Studies"],
-    title: "Peripheral Arterial Disease Detection API",
-    excerpt:
-      "A machine learning API for early detection of Peripheral Arterial Disease using synthetically generated pulse waveform signals. Awarded Best Industrial Project (MSc AI 2024).",
-    img: "https://picsum.photos/seed/proj1/600/400",
-  },
-  {
-    tags: ["Machine Learning", "Case Studies"],
-    title: "Smart Car Parking System",
-    excerpt:
-      "Computer vision–based parking management system built during MSc research — detecting and tracking vehicle occupancy in real time using image recognition.",
-    img: "https://picsum.photos/seed/proj2/600/400",
-  },
-  {
-    tags: ["Full-Stack", "Case Studies"],
-    title: "Compliance Management Portal",
-    excerpt:
-      "A secure MERN stack portal for stock trading compliance and staff tracking — with role-based access, audit logs, and real-time reporting dashboards.",
-    img: "https://picsum.photos/seed/proj3/600/400",
-  },
-  {
-    tags: ["DevOps", "Full-Stack"],
-    title: "LLM Research Platform",
-    excerpt:
-      "CI/CD pipelines on GitHub with Docker and Kubernetes, Node.js and Python backends, and custom persona systems with voice and emotional characteristics.",
-    img: "https://picsum.photos/seed/proj4/600/400",
-  },
-  {
-    tags: ["Full-Stack"],
-    title: "Employment & Recruitment Portal",
-    excerpt:
-      "A React.js employment portal used for recruitment across multiple organisations — with job listings, application tracking, and admin management workflows.",
-    img: "https://picsum.photos/seed/proj5/600/400",
-  },
-  {
-    tags: ["Full-Stack", "Case Studies"],
-    title: "HR & Performance Management System",
-    excerpt:
-      "A Flask and PostgreSQL tenant-based platform for staff performance tracking, time monitoring, and KPI management — with a yearly subscription model.",
-    img: "https://picsum.photos/seed/proj6/600/400",
-  },
-];
+function CardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white overflow-hidden animate-pulse">
+      <div className="aspect-[4/3] bg-black/10" />
+      <div className="p-6 space-y-3">
+        <div className="h-3 w-20 bg-black/10 rounded-full" />
+        <div className="h-4 w-full bg-black/10 rounded-full" />
+        <div className="h-3 w-5/6 bg-black/8 rounded-full mt-1" />
+      </div>
+    </div>
+  );
+}
 
 export default function Projects() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
+  useEffect(() => {
+    projectsApi
+      .list(true)
+      .then(setProjects)
+      .finally(() => setLoading(false));
+  }, []);
+
   function toggleTag(tag: string) {
-    if (tag === "All") {
-      setSelectedTags([]);
-      return;
-    }
+    if (tag === "All") { setSelectedTags([]); return; }
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   }
+
+  const featured = projects.find((p) => p.featured) ?? projects[0];
+  const moreProjects = projects.filter((p) => p !== featured);
 
   const filteredProjects =
     selectedTags.length === 0
@@ -78,7 +49,6 @@ export default function Projects() {
     <>
       <section className="py-24">
         <Container>
-          {/* Header */}
           <div className="mb-10">
             <h1 className="font-display text-4xl md:text-5xl text-foreground/90">
               Selected Work
@@ -86,29 +56,44 @@ export default function Projects() {
           </div>
 
           {/* Featured Project */}
-          <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center">
-            <div className="overflow-hidden rounded-2xl aspect-[3/2] group">
-              <img
-                src={featuredProject.img}
-                alt={featuredProject.title}
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-              />
+          {featured && (
+            <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center">
+              <div className="overflow-hidden rounded-2xl aspect-[3/2] group">
+                {featured.img?.endsWith(".mp4") ? (
+                  <video src={featured.img} autoPlay muted loop playsInline className="w-full h-full object-contain" />
+                ) : featured.img ? (
+                  <img
+                    src={featured.img}
+                    alt={featured.title}
+                    className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-black/5" />
+                )}
+              </div>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-1.5">
+                  {featured.tags.slice(0, 2).map((tag) => (
+                    <span key={tag} className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <h2 className="font-display text-3xl text-foreground/90 leading-tight">
+                  {featured.title}
+                </h2>
+                <p className="text-sm text-foreground/70 leading-relaxed">
+                  {featured.excerpt || featured.description}
+                </p>
+                <Link
+                  to={`/projects/${featured.slug}`}
+                  className="inline-block mt-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:bg-foreground/80 transition"
+                >
+                  View Project
+                </Link>
+              </div>
             </div>
-            <div className="space-y-4">
-              <span className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60">
-                {featuredProject.tag}
-              </span>
-              <h2 className="font-display text-3xl text-foreground/90 leading-tight">
-                {featuredProject.title}
-              </h2>
-              <p className="text-sm text-foreground/70 leading-relaxed">
-                {featuredProject.excerpt}
-              </p>
-              <button className="mt-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:bg-foreground/80 transition">
-                View Project
-              </button>
-            </div>
-          </div>
+          )}
         </Container>
       </section>
 
@@ -141,40 +126,59 @@ export default function Projects() {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {filteredProjects.map((project, i) => (
-              <div
-                key={i}
-                className="rounded-2xl border border-white/10 bg-white overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform duration-300"
-              >
-                <div className="aspect-[4/3] overflow-hidden group">
-                  <img
-                    src={project.img}
-                    alt={project.title}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                </div>
-                <div className="p-6 space-y-2">
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+          {loading ? (
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <p className="text-white/40 py-12 text-center">
+              {moreProjects.length === 0 ? "No projects yet." : "No projects match the selected filters."}
+            </p>
+          ) : (
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {filteredProjects.map((project) => (
+                <Link
+                  key={project.id}
+                  to={`/projects/${project.slug}`}
+                  className="rounded-2xl border border-white/10 bg-white overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform duration-300 block no-underline"
+                >
+                  {project.img ? (
+                    <div className="aspect-[4/3] overflow-hidden group">
+                      {project.img.endsWith(".mp4") ? (
+                        <video
+                          src={project.img}
+                          autoPlay muted loop playsInline
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <img
+                          src={project.img}
+                          alt={project.title}
+                          className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500"
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="aspect-[4/3] bg-black/5" />
+                  )}
+                  <div className="p-6 space-y-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      {project.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <h3 className="font-semibold text-foreground/90 leading-snug">{project.title}</h3>
+                    <p className="text-sm text-foreground/60 leading-relaxed">{project.description}</p>
                   </div>
-                  <h3 className="font-semibold text-foreground/90 leading-snug">
-                    {project.title}
-                  </h3>
-                  <p className="text-sm text-foreground/60 leading-relaxed">
-                    {project.excerpt}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </Container>
       </section>
     </>

@@ -1,10 +1,11 @@
+import { Link } from "react-router-dom";
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
 
 import { motion } from "framer-motion";
 import { fadeUp, fade } from "../../lib/motion";
 
-import Uri3 from "../../assets/images/Uri3.jpeg";
+import Uri from "../../assets/images/uri.jpg";
 import Uri5 from "../../assets/images/Uri5.jpeg";
 
 const homeWorks = [
@@ -112,7 +113,7 @@ export default function Home() {
                 {/* Portrait image — rounded, fills padded area */}
                 <div className="relative h-full rounded-3xl overflow-hidden">
                   <img
-                    src={Uri3}
+                    src={Uri}
                     alt="Portrait of Uri"
                     className="w-full h-full object-cover object-top"
                   />
@@ -149,7 +150,7 @@ export default function Home() {
             className="relative h-80 overflow-hidden"
           >
             <img
-              src={Uri3}
+              src={Uri}
               alt="Portrait of Uri"
               className="w-full h-full object-cover object-top"
             />
@@ -261,7 +262,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-10 items-end">
               {/* Left: eyebrow + heading */}
               <div className="space-y-4">
-                <p className="font-mono text-xs uppercase tracking-widest text-accent">
+                <p className="font-mono text-xs uppercase tracking-widest text-foreground/50">
                   Intentional. Observable. Built to Last.
                 </p>
                 <h3 className="font-display text-4xl md:text-5xl text-foreground/90">
@@ -330,7 +331,7 @@ export default function Home() {
             {/* Bottom-left: shade card (warm dark brown) */}
             <motion.div
               variants={fadeUp}
-              className="md:col-span-2 rounded-2xl bg-stone-600 p-8 flex flex-col justify-end h-64 md:h-[360px]"
+              className="md:col-span-2 rounded-2xl bg-stone-400 p-8 flex flex-col justify-end h-64 md:h-[360px]"
             >
               <p className="font-mono text-xs uppercase tracking-wider text-white/50">
                 {homeWorks[2].tag}
@@ -347,8 +348,9 @@ export default function Home() {
             {/* Bottom-right: wide image CTA card */}
             <motion.div
               variants={fadeUp}
-              className="md:col-span-3 relative rounded-2xl overflow-hidden h-64 md:h-[360px] cursor-pointer group"
+              className="md:col-span-3 relative rounded-2xl overflow-hidden h-64 md:h-[360px] group"
             >
+              <Link to="/projects" className="absolute inset-0 z-10" aria-label="View all projects" />
               <img
                 src="https://picsum.photos/seed/workcta/800/600"
                 alt="View all projects"

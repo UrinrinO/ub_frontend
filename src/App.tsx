@@ -1,9 +1,12 @@
 import Routes from "./routes/routes";
+import { ToastProvider } from "./components/ui/Toast";
 
 export default function App() {
   return (
-    <div className="bg-background text-foreground min-h-screen">
-      <Routes />
-    </div>
+    <ToastProvider>
+      <div className="bg-background text-foreground min-h-screen">
+        <Routes />
+      </div>
+    </ToastProvider>
   );
 }
