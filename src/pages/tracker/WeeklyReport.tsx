@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Container from "../../components/layout/Container";
 import { trackerApi } from "./tracker.api";
 import { getMondayYYYYMMDD } from "./tracker.utils";
-import type { WeekReport } from "./tracker.types";
+import type { WeekReport, StoredWeeklyReport, ReportNotes } from "./tracker.types";
 
 function addWeeks(yyyymmdd: string, n: number) {
   const d = new Date(`${yyyymmdd}T00:00:00Z`);
@@ -48,13 +48,173 @@ function DotRating({ value, max = 5 }: { value?: number; max?: number }) {
   );
 }
 
+/* ─── summation helpers ──────────────────────────────────────────────────── */
+
+function SummaryRow({ label, value }: { label: string; value: React.ReactNode }) {
+  if (value === undefined || value === null || value === "" || value === false) return null;
+  return (
+    <div className="flex flex-col gap-0.5">
+      <p className="font-mono text-xs uppercase tracking-widest text-black/40">{label}</p>
+      <p className="font-mono text-sm text-black/80 whitespace-pre-wrap">{value === true ? "Yes" : String(value)}</p>
+    </div>
+  );
+}
+
+function SummaryCheck({ label, value }: { label: string; value?: boolean }) {
+  if (value === undefined) return null;
+  return (
+    <div className="flex items-center gap-2">
+      <span className={`w-4 h-4 border flex items-center justify-center shrink-0 rounded ${value ? "border-black bg-black text-white" : "border-black/20"}`}>
+        {value && <span className="text-[10px] leading-none">✓</span>}
+      </span>
+      <span className="font-mono text-sm text-black/70">{label}</span>
+    </div>
+  );
+}
+
+function SummarySection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="border border-black/10 bg-white p-8 mb-4">
+      <p className="font-mono text-xs uppercase tracking-widest text-black/40 mb-6">{title}</p>
+      <div className="space-y-4">{children}</div>
+    </div>
+  );
+}
+
+function WeeklySummation({ report }: { report: StoredWeeklyReport | null }) {
+  if (!report) {
+    return <p className="font-mono text-sm text-black/40">No report saved for this week.</p>;
+  }
+  const n: ReportNotes = report.notes ?? {};
+  return (
+    <div>
+      {report.weekNumber !== null && report.weekNumber !== undefined && (
+        <p className="font-mono text-xs text-black/40 mb-6">Week #{report.weekNumber}</p>
+      )}
+
+      <SummarySection title="Overview">
+        <SummaryRow label="If < 12h — why" value={n.totalHoursNote} />
+      </SummarySection>
+
+      <SummarySection title="Job Applications">
+        <div className="grid md:grid-cols-2 gap-4">
+          <SummaryRow label="Applications submitted" value={n.applicationsSubmitted} />
+          <SummaryRow label="Tailored CV updates" value={n.cvUpdates} />
+          <SummaryRow label="Networking messages sent" value={n.networkingMessages} />
+          <SummaryRow label="Interviews scheduled" value={n.interviewsScheduled} />
+        </div>
+      </SummarySection>
+
+      <SummarySection title="Algorithms">
+        <div className="grid md:grid-cols-2 gap-4">
+          <SummaryRow label="Problems solved" value={n.algorithmsSolved} />
+          <SummaryRow label="Hard problems attempted" value={n.hardProblems} />
+          <SummaryRow label="Average solve time" value={n.avgSolveTime} />
+          <SummaryRow label="Topics covered" value={n.topicsCovered} />
+        </div>
+        <div className="flex flex-wrap gap-6 pt-2">
+          <SummaryCheck label="Timed mock completed" value={n.timedMockDone} />
+          <SummaryCheck label="Can explain optimal solution clearly" value={n.canExplainSolution} />
+        </div>
+        <SummaryRow label="Most difficult concept" value={n.mostDifficultConcept} />
+        <SummaryRow label="Notes & reflections" value={n.algorithmsNote} />
+      </SummarySection>
+
+      <SummarySection title="ML Theory">
+        <div className="grid md:grid-cols-3 gap-4">
+          <SummaryRow label="HOML chapters/sections" value={n.homlCovered} />
+          <SummaryRow label="PRML chapters/sections" value={n.prmlCovered} />
+          <SummaryRow label="DDIA chapters/sections" value={n.ddiaCovered} />
+        </div>
+        <SummaryRow label="Concepts mastered" value={n.conceptsMastered} />
+        <SummaryRow label="Notes & reflections" value={n.mlTheoryNote} />
+        <div className="pt-2">
+          <p className="font-mono text-xs uppercase tracking-widest text-black/40 mb-3">Can explain without notes</p>
+          <div className="grid md:grid-cols-2 gap-2">
+            <SummaryCheck label="Bias–variance tradeoff" value={n.biasVariance} />
+            <SummaryCheck label="Cross-validation strategy" value={n.crossValidation} />
+            <SummaryCheck label="Class imbalance handling" value={n.classImbalance} />
+            <SummaryCheck label="Model selection reasoning" value={n.modelSelection} />
+            <SummaryCheck label="Applied at least one concept to project" value={n.appliedToProject} />
+          </div>
+        </div>
+      </SummarySection>
+
+      <SummarySection title="ML Platform">
+        {n.mlPlatformChecklist && n.mlPlatformChecklist.length > 0 && (
+          <div>
+            <p className="font-mono text-xs uppercase tracking-widest text-black/40 mb-3">Work completed</p>
+            <div className="grid md:grid-cols-2 gap-2">
+              {n.mlPlatformChecklist.map((item) => (
+                <SummaryCheck key={item} label={item} value={true} />
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="grid md:grid-cols-2 gap-4">
+          <SummaryRow label="Experiments run" value={n.experimentsRun} />
+          <SummaryRow label="Best validation metric" value={n.bestMetric} />
+          <SummaryRow label="Metric change vs last week" value={n.metricChange} />
+          <SummaryRow label="Deployment errors" value={n.deploymentErrors} />
+        </div>
+        <SummaryRow label="What improved" value={n.whatImproved} />
+        <SummaryRow label="What failed" value={n.whatFailed} />
+        <div className="flex flex-wrap gap-6">
+          <SummaryCheck label="API live" value={n.apiLive} />
+          <SummaryCheck label="System stable" value={n.systemStable} />
+        </div>
+      </SummarySection>
+
+      <SummarySection title="System Design">
+        <SummaryRow label="Topic studied" value={n.systemDesignTopic} />
+        <SummaryCheck label="Can explain trade-offs clearly" value={n.canExplainTradeoffs} />
+      </SummarySection>
+
+      <SummarySection title="Technical Growth Self-Check">
+        <div className="grid md:grid-cols-2 gap-2">
+          <SummaryCheck label="Time/space complexity of a DFS problem" value={n.dfsComplexity} />
+          <SummaryCheck label="When to use LightGBM over Logistic Regression" value={n.lightgbmVsLogistic} />
+          <SummaryCheck label="Precision vs Recall tradeoff" value={n.precisionRecall} />
+          <SummaryCheck label="Why a model might be overfit" value={n.whyOverfit} />
+        </div>
+      </SummarySection>
+
+      <SummarySection title="Metrics Snapshot">
+        <div className="grid md:grid-cols-2 gap-4">
+          <SummaryRow label="Total algorithms solved (cumulative)" value={n.algorithmsTotal} />
+          <SummaryRow label="Total experiments run (cumulative)" value={n.experimentsTotal} />
+          <SummaryRow label="Current best model metric" value={n.bestModelMetric} />
+        </div>
+        <SummaryRow label="Current deployment state" value={n.deploymentState} />
+      </SummarySection>
+
+      <SummarySection title="Discipline Score">
+        <SummaryRow label="Score (1–10)" value={n.disciplineScore} />
+        <SummaryRow label="Reasoning" value={n.disciplineReasoning} />
+      </SummarySection>
+
+      <SummarySection title="Next Week Focus">
+        <SummaryRow label="Top priorities" value={n.nextWeekFocus} />
+      </SummarySection>
+    </div>
+  );
+}
+
+/* ─── main component ─────────────────────────────────────────────────────── */
+
 export default function WeeklyReport() {
   const [weekStart, setWeekStart] = useState(getMondayYYYYMMDD);
   const [week, setWeek] = useState<WeekReport | null>(null);
+  const [report, setReport] = useState<StoredWeeklyReport | null>(null);
+  const [tab, setTab] = useState<"tracker" | "summation">("tracker");
 
   useEffect(() => {
     setWeek(null);
-    trackerApi.getWeek(weekStart).then(setWeek).catch(console.error);
+    setReport(null);
+    trackerApi.getWeeklyReport(weekStart).then(({ sessions, report }) => {
+      setWeek(sessions);
+      setReport(report);
+    }).catch(console.error);
   }, [weekStart]);
 
   const totalHours = week ? (week.totalMinutes / 60).toFixed(1) : "--";
@@ -64,10 +224,10 @@ export default function WeeklyReport() {
       <Container>
 
         {/* Header */}
-        <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
+        <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
           <div>
             <h1 className="font-display text-5xl md:text-6xl leading-none text-black">
-              Weekly Tracker
+              {tab === "tracker" ? "Weekly Tracker" : "Weekly Summation"}
             </h1>
             <p className="text-lg text-black/50 mt-2">
               One Year Personal Development Plan
@@ -92,7 +252,37 @@ export default function WeeklyReport() {
           </div>
         </div>
 
-        {!week ? (
+        {/* Tab toggle */}
+        <div className="flex gap-1 mb-8 border-b border-black/10">
+          <button
+            onClick={() => setTab("tracker")}
+            className={`px-4 py-2 font-mono text-xs uppercase tracking-widest transition border-b-2 -mb-px ${
+              tab === "tracker"
+                ? "border-black text-black"
+                : "border-transparent text-black/40 hover:text-black/60"
+            }`}
+          >
+            Weekly Tracker
+          </button>
+          <button
+            onClick={() => setTab("summation")}
+            className={`px-4 py-2 font-mono text-xs uppercase tracking-widest transition border-b-2 -mb-px ${
+              tab === "summation"
+                ? "border-black text-black"
+                : "border-transparent text-black/40 hover:text-black/60"
+            }`}
+          >
+            Weekly Summation
+          </button>
+        </div>
+
+        {tab === "summation" ? (
+          !week && !report ? (
+            <p className="font-mono text-sm text-black/40">Loading…</p>
+          ) : (
+            <WeeklySummation report={report} />
+          )
+        ) : !week ? (
           <p className="font-mono text-sm text-black/40">Loading…</p>
         ) : (
           <>
