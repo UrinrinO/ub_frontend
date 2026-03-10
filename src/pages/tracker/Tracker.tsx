@@ -20,16 +20,6 @@ import { usePiP } from "./usePiP";
 
 /* ---------- CONSTANTS ---------- */
 
-const categories: Category[] = [
-  "ALGORITHMS",
-  "ML_THEORY",
-  "ML_PLATFORM",
-  "SYSTEM_DESIGN",
-  "JOB_APPLICATIONS",
-  "READING",
-  "MOCK_INTERVIEW",
-];
-
 function labelCategory(cat: string) {
   return cat.replaceAll("_", " ");
 }
@@ -47,6 +37,7 @@ export default function Tracker() {
 
   const [selectedCategory, setSelectedCategory] =
     useState<Category>("ALGORITHMS");
+  const [categories, setCategories] = useState<{ key: string; label: string }[]>([]);
 
   const { openPiP, isPiPOpen } = usePiP();
   const toast = useToast();
@@ -87,6 +78,14 @@ export default function Tracker() {
       .then((w) => dispatch(weekLoaded(w)))
       .catch(console.error);
   }, [dispatch]);
+
+  /* Load categories */
+  useEffect(() => {
+    trackerApi
+      .getCategories()
+      .then((cats) => setCategories(cats.map((c) => ({ key: c.key, label: c.label }))))
+      .catch(console.error);
+  }, []);
 
   /* Timer tick */
   useEffect(() => {
@@ -236,15 +235,15 @@ export default function Tracker() {
                 <div className="flex flex-wrap gap-3">
                   {categories.map((cat) => (
                     <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
+                      key={cat.key}
+                      onClick={() => setSelectedCategory(cat.key)}
                       className={`px-4 py-2 border text-sm font-mono transition ${
-                        selectedCategory === cat
+                        selectedCategory === cat.key
                           ? "bg-black text-white border-black"
                           : "border-black/15 text-black/60 hover:border-black/40"
                       }`}
                     >
-                      {labelCategory(cat)}
+                      {cat.label}
                     </button>
                   ))}
                 </div>

@@ -11,13 +11,13 @@ export default function Footer() {
           </p>
 
           <div className="flex items-center gap-6 text-sm font-body text-foreground/80">
-            <a href="#" className="hover:text-foreground transition">
+            <a href="https://github.com/UrinrinO" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition">
               GitHub
             </a>
-            <a href="#" className="hover:text-foreground transition">
+            <a href="https://linkedin.com/in/urinrin-ogidiama" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition">
               LinkedIn
             </a>
-            <a href="#" className="hover:text-foreground transition">
+            <a href="/engineering-notes" className="hover:text-foreground transition">
               Engineering Notes
             </a>
           </div>

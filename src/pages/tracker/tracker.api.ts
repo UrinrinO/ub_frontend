@@ -1,5 +1,5 @@
 import { API_URL } from "../../lib/api";
-import type { WeekReport, WorkSession } from "./tracker.types";
+import type { WeekReport, WorkSession, TrackerCategory } from "./tracker.types";
 
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(await res.text());
@@ -70,5 +70,11 @@ export const trackerApi = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ weekNumber, notes }),
     }).then((res) => json<import("./tracker.types").StoredWeeklyReport>(res));
+  },
+
+  getCategories() {
+    return fetch(`${API_URL}/api/tracker/categories`).then((res) =>
+      json<TrackerCategory[]>(res),
+    );
   },
 };

@@ -1,11 +1,13 @@
-export type Category =
-  | "ALGORITHMS"
-  | "ML_THEORY"
-  | "ML_PLATFORM"
-  | "SYSTEM_DESIGN"
-  | "JOB_APPLICATIONS"
-  | "READING"
-  | "MOCK_INTERVIEW";
+export type Category = string;
+
+export interface TrackerCategory {
+  id: string;
+  key: string;
+  label: string;
+  targetMinutes: number;
+  active: boolean;
+  order: number;
+}
 
 export type SessionStatus = "ACTIVE" | "PAUSED" | "COMPLETED" | "ABANDONED";
 

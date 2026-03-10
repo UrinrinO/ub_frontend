@@ -68,7 +68,10 @@ export default function Home() {
                     backends to full-stack platforms, built for production.
                   </p>
                   <div className="flex flex-wrap items-center gap-8">
-                    <Button>View Architecture →</Button>
+                    <Link to="/projects" className="relative overflow-hidden px-6 py-3 rounded-full font-medium bg-foreground text-white group inline-flex items-center">
+                      <span className="absolute inset-0 rounded-full bg-white/[0.12] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
+                      <span className="relative z-10">View Projects →</span>
+                    </Link>
                     <span className="text-sm text-foreground/60">
                       or{" "}
                       <a
@@ -181,7 +184,10 @@ export default function Home() {
               variants={fadeUp}
               className="flex flex-wrap gap-4 justify-center"
             >
-              <Button>View Architecture →</Button>
+              <Link to="/projects" className="relative overflow-hidden px-6 py-3 rounded-full font-medium bg-foreground text-white group inline-flex items-center">
+                <span className="absolute inset-0 rounded-full bg-white/[0.12] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
+                <span className="relative z-10">View Projects →</span>
+              </Link>
               <Button variant="secondary">Book A Call →</Button>
             </motion.div>
           </div>
@@ -239,9 +245,10 @@ export default function Home() {
               </div>
               <a
                 href="/about"
-                className="inline-block px-6 py-3 rounded-full bg-white text-foreground text-sm hover:bg-white/90 transition"
+                className="relative overflow-hidden inline-flex items-center px-6 py-3 rounded-full bg-white text-foreground text-sm group"
               >
-                Read more →
+                <span className="absolute inset-0 rounded-full bg-black/[0.06] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
+                <span className="relative z-10">Read more →</span>
               </a>
             </motion.div>
           </div>

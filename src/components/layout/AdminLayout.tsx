@@ -7,12 +7,14 @@ import {
   RiTimeLine,
   RiFileList3Line,
   RiArrowLeftLine,
+  RiBookOpenLine,
 } from "@remixicon/react";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: RiDashboardLine, end: true },
   { to: "/admin/blog", label: "Blog", icon: RiArticleLine, end: false },
   { to: "/admin/projects", label: "Projects", icon: RiFolderLine, end: false },
+  { to: "/admin/notes", label: "Eng. Notes", icon: RiBookOpenLine, end: false },
   { to: "/admin/tracker", label: "Tracker", icon: RiTimeLine, end: false },
   { to: "/admin/report", label: "Report", icon: RiFileList3Line, end: false },
 ];

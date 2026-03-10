@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
 import Container from "../../components/layout/Container";
 import {
   RiBrainLine,
@@ -9,26 +10,94 @@ import {
 
 const story = [
   {
+    num: "01",
     year: "2016",
     title: "Software Engineering Beginnings",
-    body: "Started my software journey building full-stack web applications — MEAN/MERN stack projects, RESTful APIs, Django backends, and payment gateway integrations serving real clients.",
+    body: "Built production systems from day one — MEAN and MERN stack applications, Django REST APIs, and payment gateway integrations serving live clients. Learned early that decisions made at the start determine how far a system can go.",
+    tags: ["React", "Node.js", "Django", "MongoDB", "REST APIs"],
   },
   {
-    year: "2018–2023",
-    title: "From Developer to Lead",
-    body: "Grew into lead roles heading front-end teams, architecting DevOps pipelines, designing scalable database schemas, and delivering production systems across multiple sectors.",
+    num: "02",
+    year: "2018 – 2023",
+    title: "From Developer to Engineering Lead",
+    body: "Grew into leadership — heading front-end teams, owning database architecture, and designing DevOps pipelines across complex multi-stakeholder projects. Shifted from writing code to shaping how teams build systems that last.",
+    tags: ["Team Lead", "DevOps", "CI/CD", "SQL Server", "Architecture"],
   },
   {
+    num: "03",
     year: "2024",
     title: "MSc in Artificial Intelligence",
-    body: "Completed my master's degree at the University of South Wales. Built a computer vision car parking system and a pulse waveform-based disease classifier — winning the Best Industrial Project Award.",
+    body: "Completed my master's at the University of South Wales, specialising in machine learning and computer vision. Delivered a CV-based car park management system and a pulse waveform disease classifier. Awarded Best Industrial Project.",
+    tags: ["TensorFlow", "Computer Vision", "Scikit-Learn", "Research", "Award"],
   },
   {
-    year: "Today",
+    num: "04",
+    year: "Now",
     title: "AI & LLM Engineering",
-    body: "Leading enterprise AI and LLM solution development — from Generative AI backends and MLOps pipelines on Azure to full-stack platforms built for long-term production use.",
+    body: "Building enterprise-grade AI systems — Generative AI backends with LangChain, end-to-end MLOps pipelines on Azure, and production LLM platforms designed to scale. The full arc from software to AI, applied to real problems.",
+    tags: ["LangChain", "Azure", "MLflow", "LLMs", "MLOps"],
   },
 ];
+
+function StoryRow({ item, isLast }: { item: typeof story[0]; isLast: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: false, margin: "-80px" });
+
+  return (
+    <div ref={ref} className={`border-t border-black/10 py-12${isLast ? " border-b" : ""}`}>
+      {/* flex row: number | orange vertical line | content */}
+      <div className="flex gap-6 md:gap-10">
+        {/* Large number */}
+        <motion.span
+          className="font-display text-5xl md:text-7xl leading-none text-foreground/10 select-none w-14 md:w-20 shrink-0 pt-1"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          {item.num}
+        </motion.span>
+
+        {/* Orange vertical line — stretches to full row height */}
+        <div className="relative w-[2px] shrink-0 overflow-hidden rounded-full">
+          <div className="absolute inset-0 bg-black/6" />
+          <motion.div
+            className="absolute inset-0 bg-foreground"
+            initial={{ scaleY: 0 }}
+            animate={inView ? { scaleY: 1 } : {}}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            style={{ transformOrigin: "top" }}
+          />
+        </div>
+
+        {/* Content */}
+        <motion.div
+          className="flex-1 space-y-4 pl-2 md:pl-4"
+          initial={{ opacity: 0, y: 14 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <p className="font-mono text-xs uppercase tracking-widest text-foreground/40">
+            {item.year}
+          </p>
+          <h3 className="font-display text-2xl md:text-[1.75rem] text-foreground/90 leading-snug">
+            {item.title}
+          </h3>
+          <p className="text-base text-foreground/60 leading-relaxed">{item.body}</p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {item.tags.map((t) => (
+              <span
+                key={t}
+                className="font-mono text-xs px-2.5 py-1 border border-black/10 text-foreground/40 tracking-wide"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
 
 const expertise = [
   {
@@ -70,6 +139,7 @@ function InteractiveCapabilities() {
         <div className="flex flex-col gap-3 md:flex-1">
           {[0, 2].map((i) => {
             const item = expertise[i];
+            const Icon = item.icon;
             return (
               <button
                 key={item.title}
@@ -85,13 +155,10 @@ function InteractiveCapabilities() {
                     active === i ? "bg-foreground/5" : "bg-white/15"
                   }`}
                 >
-                  <span
-                    className={`font-mono text-xs font-semibold ${
-                      active === i ? "text-foreground/50" : "text-white/50"
-                    }`}
-                  >
-                    {item.abbr}
-                  </span>
+                  <Icon
+                    size={18}
+                    className={active === i ? "text-foreground/50" : "text-white/50"}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <h3
@@ -117,6 +184,7 @@ function InteractiveCapabilities() {
         <div className="flex flex-col gap-3 md:flex-1 md:mt-8">
           {[1, 3].map((i) => {
             const item = expertise[i];
+            const Icon = item.icon;
             return (
               <button
                 key={item.title}
@@ -132,13 +200,10 @@ function InteractiveCapabilities() {
                     active === i ? "bg-foreground/5" : "bg-white/15"
                   }`}
                 >
-                  <span
-                    className={`font-mono text-xs font-semibold ${
-                      active === i ? "text-foreground/50" : "text-white/50"
-                    }`}
-                  >
-                    {item.abbr}
-                  </span>
+                  <Icon
+                    size={18}
+                    className={active === i ? "text-foreground/50" : "text-white/50"}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <h3
@@ -173,9 +238,10 @@ function InteractiveCapabilities() {
         </p>
         <a
           href="/contact"
-          className="inline-block px-6 py-3 rounded-full bg-white text-foreground text-sm hover:bg-white/90 transition"
+          className="relative overflow-hidden inline-flex items-center px-6 py-3 rounded-full bg-white text-foreground text-sm group"
         >
-          Get in touch →
+          <span className="absolute inset-0 rounded-full bg-black/[0.06] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
+          <span className="relative z-10">Get in touch →</span>
         </a>
       </div>
     </div>
@@ -212,15 +278,10 @@ export default function About() {
               <div className="flex gap-6 text-sm">
                 <a
                   href="/contact"
-                  className="px-5 py-2.5 rounded-full bg-foreground text-background hover:bg-foreground/80 transition"
+                  className="relative overflow-hidden inline-flex items-center px-5 py-2.5 rounded-full bg-foreground text-background group"
                 >
-                  Contact Me →
-                </a>
-                <a
-                  href="/projects"
-                  className="px-5 py-2.5 rounded-full border border-black/20 text-foreground/70 hover:border-black/40 transition"
-                >
-                  View Work →
+                  <span className="absolute inset-0 rounded-full bg-white/[0.12] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
+                  <span className="relative z-10">Contact Me →</span>
                 </a>
               </div>
             </div>
@@ -238,41 +299,26 @@ export default function About() {
       {/* MY BACKGROUND / STORY */}
       <section className="py-24">
         <Container>
-          <div className="grid lg:grid-cols-[2fr_3fr] gap-16 items-start">
-            <div className="space-y-4 lg:sticky lg:top-28">
-              <p className="font-mono text-xs uppercase tracking-wide text-foreground/50">
-                Background
-              </p>
-              <h2 className="font-display text-3xl md:text-4xl text-foreground/90 leading-tight">
-                My Story
-              </h2>
-              <p className="text-base text-foreground/60 leading-relaxed">
-                The transitions that shaped how I build systems today — from
-                full-stack development to AI engineering and team leadership.
-              </p>
+          <div className="lg:grid lg:grid-cols-[1fr_2fr] lg:gap-20">
+            {/* Left: sticky heading */}
+            <div className="mb-14 lg:mb-0">
+              <div className="lg:sticky lg:top-28">
+                <p className="font-mono text-xs uppercase tracking-widest text-foreground/40 mb-3">
+                  Background
+                </p>
+                <h2 className="font-display text-[clamp(2.5rem,5vw,4rem)] text-foreground/90 leading-tight">
+                  My Story
+                </h2>
+                <p className="mt-5 text-sm text-foreground/50 leading-relaxed max-w-xs">
+                  Not every engineer grows — some just accumulate years. Every chapter here was earned with intention, each skill compounded on the last in deliberate pursuit of craft and impact.
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-0">
+            {/* Right: scrollable story items */}
+            <div>
               {story.map((item, i) => (
-                <div key={item.title} className="flex gap-6 pb-10 relative">
-                  {i < story.length - 1 && (
-                    <div className="absolute left-[19px] top-8 bottom-0 w-px bg-black/10" />
-                  )}
-                  <div className="shrink-0 mt-1 w-10 h-10 rounded-full bg-white border border-black/10 flex items-center justify-center z-10">
-                    <span className="w-2.5 h-2.5 rounded-full bg-foreground/20 block" />
-                  </div>
-                  <div className="space-y-1 pt-2">
-                    <p className="font-mono text-xs uppercase tracking-wide text-foreground/40">
-                      {item.year}
-                    </p>
-                    <h3 className="text-xl font-semibold text-foreground/90">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-foreground/60 leading-relaxed">
-                      {item.body}
-                    </p>
-                  </div>
-                </div>
+                <StoryRow key={item.num} item={item} isLast={i === story.length - 1} />
               ))}
             </div>
           </div>

@@ -12,6 +12,9 @@ import Tracker from "../pages/tracker/Tracker";
 import WeeklyReport from "../pages/tracker/WeeklyReport";
 import BlogPost from "../pages/blog/BlogPost";
 import ProjectPost from "../pages/projects/ProjectPost";
+import Notes from "../pages/notes/Notes";
+import SeriesDetail from "../pages/notes/SeriesDetail";
+import PartDetail from "../pages/notes/PartDetail";
 
 import Dashboard from "../pages/admin/Dashboard";
 import BlogList from "../pages/admin/BlogList";
@@ -20,6 +23,8 @@ import ProjectsList from "../pages/admin/ProjectsList";
 import ProjectEditor from "../pages/admin/ProjectEditor";
 import TrackerView from "../pages/admin/TrackerView";
 import AdminReport from "../pages/admin/AdminReport";
+import NotesList from "../pages/admin/NotesList";
+import PartEditor from "../pages/admin/PartEditor";
 
 export default function AppRoutes() {
   return (
@@ -33,6 +38,9 @@ export default function AppRoutes() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/engineering-notes" element={<Notes />} />
+        <Route path="/engineering-notes/:slug" element={<SeriesDetail />} />
+        <Route path="/engineering-notes/:slug/:partSlug" element={<PartDetail />} />
         <Route
           path="/tracker"
           element={
@@ -78,6 +86,9 @@ export default function AppRoutes() {
         <Route path="projects/:id" element={<ProjectEditor />} />
         <Route path="tracker" element={<TrackerView />} />
         <Route path="report" element={<AdminReport />} />
+        <Route path="notes" element={<NotesList />} />
+        <Route path="notes/:seriesId/parts/new" element={<PartEditor />} />
+        <Route path="notes/:seriesId/parts/:partId" element={<PartEditor />} />
       </Route>
     </Routes>
   );

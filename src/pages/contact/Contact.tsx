@@ -109,8 +109,9 @@ export default function Contact() {
               </div>
             </div>
 
-            <button className="w-full px-5 py-3 rounded-full bg-white text-foreground text-sm hover:bg-white/90 transition">
-              Send Message →
+            <button className="relative overflow-hidden w-full px-5 py-3 rounded-full bg-white text-foreground text-sm group">
+              <span className="absolute inset-0 rounded-full bg-black/[0.06] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
+              <span className="relative z-10">Send Message →</span>
             </button>
           </div>
 

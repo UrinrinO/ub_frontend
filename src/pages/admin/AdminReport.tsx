@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { trackerApi } from "../tracker/tracker.api";
 import { getMondayYYYYMMDD } from "../tracker/tracker.utils";
-import type { ReportNotes, WeekReport } from "../tracker/tracker.types";
+import type { ReportNotes, WeekReport, TrackerCategory } from "../tracker/tracker.types";
 
 /* ─── helpers ────────────────────────────────────────────────────────────── */
 
@@ -16,16 +16,6 @@ function fmtMins(mins: number) {
   const m = mins % 60;
   return h > 0 ? `${h}h ${m > 0 ? `${m}m` : ""}`.trim() : `${m}m`;
 }
-
-const CATEGORY_TARGETS: Record<string, { label: string; targetMins: number }> = {
-  JOB_APPLICATIONS: { label: "Job Applications", targetMins: 120 },
-  ALGORITHMS:       { label: "Algorithms",        targetMins: 300 },
-  ML_THEORY:        { label: "ML Theory",          targetMins: 180 },
-  ML_PLATFORM:      { label: "ML Platform",        targetMins: 180 },
-  SYSTEM_DESIGN:    { label: "System Design",      targetMins: 60  },
-  READING:          { label: "Reading",            targetMins: 0   },
-  MOCK_INTERVIEW:   { label: "Mock Interview",     targetMins: 0   },
-};
 
 const ML_PLATFORM_ITEMS = [
   "Feature engineering improved",
@@ -168,6 +158,15 @@ export default function AdminReport() {
   const [notes, setNotes] = useState<ReportNotes>({});
   const [sessions, setSessions] = useState<WeekReport | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [categories, setCategories] = useState<TrackerCategory[]>([]);
+
+  useEffect(() => {
+    trackerApi.getCategories().then(setCategories).catch(console.error);
+  }, []);
+
+  function catTarget(key: string) {
+    return categories.find((c) => c.key === key)?.targetMinutes ?? 0;
+  }
 
   const patch = useCallback(<K extends keyof ReportNotes>(key: K, val: ReportNotes[K]) => {
     setNotes((prev) => ({ ...prev, [key]: val }));
@@ -280,20 +279,20 @@ export default function AdminReport() {
 
         {sessions && (
           <div className="space-y-3 pt-2">
-            {Object.entries(CATEGORY_TARGETS).map(([key, { label, targetMins }]) => {
-              const mins = sessions.perCategory[key] ?? 0;
-              if (!mins && !targetMins) return null;
+            {categories.map((cat) => {
+              const mins = sessions.perCategory[cat.key] ?? 0;
+              if (!mins && !cat.targetMinutes) return null;
               const barPct =
-                targetMins > 0
-                  ? Math.min(100, Math.round((mins / targetMins) * 100))
+                cat.targetMinutes > 0
+                  ? Math.min(100, Math.round((mins / cat.targetMinutes) * 100))
                   : 100;
               return (
-                <div key={key}>
+                <div key={cat.key}>
                   <div className="flex justify-between font-mono text-xs text-black/50 mb-1">
-                    <span>{label}</span>
+                    <span>{cat.label}</span>
                     <span>
                       {fmtMins(mins)}
-                      {targetMins > 0 ? ` / ${fmtMins(targetMins)}` : ""}
+                      {cat.targetMinutes > 0 ? ` / ${fmtMins(cat.targetMinutes)}` : ""}
                     </span>
                   </div>
                   <div className="h-[2px] bg-black/10">
@@ -311,7 +310,7 @@ export default function AdminReport() {
         <SectionHeader
           label="Job Applications"
           mins={sessions?.perCategory["JOB_APPLICATIONS"]}
-          targetMins={120}
+          targetMins={catTarget("JOB_APPLICATIONS")}
         />
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="Applications submitted (with breakdown)">
@@ -350,7 +349,7 @@ export default function AdminReport() {
         <SectionHeader
           label="Algorithms"
           mins={sessions?.perCategory["ALGORITHMS"]}
-          targetMins={300}
+          targetMins={catTarget("ALGORITHMS")}
         />
         <div className="grid md:grid-cols-2 gap-4">
           <Field label="Problems solved">
@@ -416,7 +415,7 @@ export default function AdminReport() {
         <SectionHeader
           label="ML Theory"
           mins={sessions?.perCategory["ML_THEORY"]}
-          targetMins={180}
+          targetMins={catTarget("ML_THEORY")}
         />
         <div className="grid md:grid-cols-3 gap-4">
           <Field label="HOML chapters/sections">
@@ -498,7 +497,7 @@ export default function AdminReport() {
         <SectionHeader
           label="ML Platform"
           mins={sessions?.perCategory["ML_PLATFORM"]}
-          targetMins={180}
+          targetMins={catTarget("ML_PLATFORM")}
         />
         <div className="space-y-2">
           <p className="font-mono text-xs uppercase tracking-widest text-black/40 mb-3">
@@ -587,7 +586,7 @@ export default function AdminReport() {
         <SectionHeader
           label="System Design"
           mins={sessions?.perCategory["SYSTEM_DESIGN"]}
-          targetMins={60}
+          targetMins={catTarget("SYSTEM_DESIGN")}
         />
         <Field label="Topic studied">
           <TextArea

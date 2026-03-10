@@ -87,9 +87,10 @@ export default function Projects() {
                 </p>
                 <Link
                   to={`/projects/${featured.slug}`}
-                  className="inline-block mt-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:bg-foreground/80 transition"
+                  className="relative overflow-hidden inline-flex items-center mt-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm group"
                 >
-                  View Project
+                  <span className="absolute inset-0 rounded-full bg-white/[0.12] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
+                  <span className="relative z-10">View Project</span>
                 </Link>
               </div>
             </div>

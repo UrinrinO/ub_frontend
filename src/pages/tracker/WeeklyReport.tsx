@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Container from "../../components/layout/Container";
 import { trackerApi } from "./tracker.api";
 import { getMondayYYYYMMDD } from "./tracker.utils";
-import type { WeekReport, StoredWeeklyReport, ReportNotes } from "./tracker.types";
+import type { WeekReport, StoredWeeklyReport, ReportNotes, TrackerCategory } from "./tracker.types";
 
 function addWeeks(yyyymmdd: string, n: number) {
   const d = new Date(`${yyyymmdd}T00:00:00Z`);
@@ -16,23 +16,6 @@ function fmtMins(mins: number) {
   return h > 0 ? `${h}h ${m > 0 ? `${m}m` : ""}`.trim() : `${m}m`;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  JOB_APPLICATIONS: "Job Applications",
-  ALGORITHMS: "Algorithms",
-  ML_THEORY: "ML Theory",
-  ML_PLATFORM: "ML Platform",
-  SYSTEM_DESIGN: "System Design",
-  READING: "Reading",
-  MOCK_INTERVIEW: "Mock Interview",
-};
-
-const CATEGORY_TARGETS: Record<string, number> = {
-  JOB_APPLICATIONS: 120,
-  ALGORITHMS: 300,
-  ML_THEORY: 180,
-  ML_PLATFORM: 180,
-  SYSTEM_DESIGN: 60,
-};
 
 function DotRating({ value, max = 5 }: { value?: number; max?: number }) {
   if (value === undefined) return null;
@@ -207,6 +190,11 @@ export default function WeeklyReport() {
   const [week, setWeek] = useState<WeekReport | null>(null);
   const [report, setReport] = useState<StoredWeeklyReport | null>(null);
   const [tab, setTab] = useState<"tracker" | "summation">("tracker");
+  const [categories, setCategories] = useState<TrackerCategory[]>([]);
+
+  useEffect(() => {
+    trackerApi.getCategories().then(setCategories).catch(console.error);
+  }, []);
 
   useEffect(() => {
     setWeek(null);
@@ -216,6 +204,9 @@ export default function WeeklyReport() {
       setReport(report);
     }).catch(console.error);
   }, [weekStart]);
+
+  const categoryLabel = (key: string) =>
+    categories.find((c) => c.key === key)?.label ?? key.replaceAll("_", " ");
 
   const totalHours = week ? (week.totalMinutes / 60).toFixed(1) : "--";
 
@@ -332,9 +323,10 @@ export default function WeeklyReport() {
                 By Category
               </p>
               <div className="space-y-4">
-                {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
-                  const mins = week.perCategory[key] ?? 0;
-                  const target = CATEGORY_TARGETS[key] ?? 0;
+                {Object.entries(week.perCategory).map(([key, mins]) => {
+                  const cat = categories.find((c) => c.key === key);
+                  const label = cat?.label ?? key.replaceAll("_", " ");
+                  const target = cat?.targetMinutes ?? 0;
                   if (!mins && !target) return null;
                   const pct =
                     target > 0
@@ -387,8 +379,7 @@ export default function WeeklyReport() {
                               {dayLabel}
                             </span>
                             <span className="px-2.5 py-0.5 bg-black/5 font-mono text-xs uppercase tracking-wide text-black/60">
-                              {CATEGORY_LABELS[s.category] ??
-                                s.category.replace(/_/g, " ")}
+                              {categoryLabel(s.category)}
                             </span>
                           </div>
                           <span className="font-mono text-sm font-semibold text-black/70 shrink-0">
