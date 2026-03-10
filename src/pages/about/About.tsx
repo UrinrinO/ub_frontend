@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { fadeUp, fade } from "../../lib/motion";
 import Container from "../../components/layout/Container";
 import {
   RiBrainLine,
@@ -255,7 +256,13 @@ export default function About() {
       <section className="py-24">
         <Container>
           <div className="max-w-full md:max-w-[80%]">
-            <div className="space-y-8">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: false, amount: 0.2 }}
+              variants={fadeUp}
+              className="space-y-8"
+            >
               <h1 className="font-display text-[clamp(3rem,6vw,5.5rem)] leading-[0.96] tracking-tight text-foreground/90">
                 Engineer.
                 <br />
@@ -284,7 +291,7 @@ export default function About() {
                   <span className="relative z-10">Contact Me →</span>
                 </a>
               </div>
-            </div>
+            </motion.div>
           </div>
         </Container>
       </section>
@@ -343,14 +350,26 @@ export default function About() {
 
           {/* Row 1: image left, text right */}
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center mb-16 md:mb-24">
-            <div className="rounded-3xl overflow-hidden aspect-[4/3] group">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: false, amount: 0.2 }}
+              variants={fade}
+              className="rounded-3xl overflow-hidden aspect-[4/3] group"
+            >
               <img
                 src="https://picsum.photos/seed/expertise1/800/600"
                 alt="ML Systems"
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               />
-            </div>
-            <div className="space-y-6">
+            </motion.div>
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: false, amount: 0.2 }}
+              variants={fadeUp}
+              className="space-y-6"
+            >
               <p className="font-mono text-xs uppercase tracking-wide text-foreground/50">
                 AI & Full-Stack
               </p>
@@ -376,12 +395,18 @@ export default function About() {
                   MLOps pipelines with MLflow, DVC, and TensorFlow on Azure
                 </li>
               </ul>
-            </div>
+            </motion.div>
           </div>
 
           {/* Row 2: text left, image right */}
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div className="space-y-6 order-last md:order-first">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: false, amount: 0.2 }}
+              variants={fadeUp}
+              className="space-y-6 order-last md:order-first"
+            >
               <p className="font-mono text-xs uppercase tracking-wide text-foreground/50">
                 Cloud & DevOps
               </p>
@@ -407,14 +432,20 @@ export default function About() {
                   Power BI and SQL Server integrations for data-driven systems
                 </li>
               </ul>
-            </div>
-            <div className="rounded-3xl overflow-hidden aspect-[4/3] order-first md:order-last group">
+            </motion.div>
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: false, amount: 0.2 }}
+              variants={fade}
+              className="rounded-3xl overflow-hidden aspect-[4/3] order-first md:order-last group"
+            >
               <img
                 src="https://picsum.photos/seed/expertise2/800/600"
                 alt="Infrastructure"
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               />
-            </div>
+            </motion.div>
           </div>
         </Container>
       </section>

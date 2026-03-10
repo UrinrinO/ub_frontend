@@ -1,4 +1,13 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 import AppLayout from "../components/layout/AppLayout";
 import AdminLayout from "../components/layout/AdminLayout";
 import PasswordGate from "../components/ui/PasswordGate";
@@ -28,6 +37,8 @@ import PartEditor from "../pages/admin/PartEditor";
 
 export default function AppRoutes() {
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       {/* Public site */}
       <Route element={<AppLayout />}>
@@ -91,5 +102,6 @@ export default function AppRoutes() {
         <Route path="notes/:seriesId/parts/:partId" element={<PartEditor />} />
       </Route>
     </Routes>
+    </>
   );
 }

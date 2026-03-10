@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Container from "../../components/layout/Container";
 import { projectsApi, type Project } from "../../lib/adminApi";
+import { fadeUp, fade, stagger } from "../../lib/motion";
 
 const projectTags = ["All", "Case Studies", "Machine Learning", "Full-Stack", "DevOps"];
 
@@ -49,16 +51,28 @@ export default function Projects() {
     <>
       <section className="py-24">
         <Container>
-          <div className="mb-10">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: false, amount: 0.2 }}
+            variants={fadeUp}
+            className="mb-10"
+          >
             <h1 className="font-display text-4xl md:text-5xl text-foreground/90">
               Selected Work
             </h1>
-          </div>
+          </motion.div>
 
           {/* Featured Project */}
           {featured && (
             <div className="grid md:grid-cols-[3fr_2fr] gap-10 items-center">
-              <div className="overflow-hidden rounded-2xl aspect-[3/2] group">
+              <motion.div
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: false, amount: 0.2 }}
+                variants={fade}
+                className="overflow-hidden rounded-2xl aspect-[3/2] group"
+              >
                 {featured.img?.endsWith(".mp4") ? (
                   <video src={featured.img} autoPlay muted loop playsInline className="w-full h-full object-contain" />
                 ) : featured.img ? (
@@ -70,8 +84,14 @@ export default function Projects() {
                 ) : (
                   <div className="w-full h-full bg-black/5" />
                 )}
-              </div>
-              <div className="space-y-4">
+              </motion.div>
+              <motion.div
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: false, amount: 0.2 }}
+                variants={fadeUp}
+                className="space-y-4"
+              >
                 <div className="flex flex-wrap gap-1.5">
                   {featured.tags.slice(0, 2).map((tag) => (
                     <span key={tag} className="inline-block px-3 py-1 rounded-full bg-black/5 text-xs font-mono uppercase tracking-wide text-foreground/60">
@@ -92,7 +112,7 @@ export default function Projects() {
                   <span className="absolute inset-0 rounded-full bg-white/[0.12] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
                   <span className="relative z-10">View Project</span>
                 </Link>
-              </div>
+              </motion.div>
             </div>
           )}
         </Container>
@@ -101,7 +121,13 @@ export default function Projects() {
       {/* More Projects */}
       <section className="py-24 bg-foreground">
         <Container>
-          <div className="mb-10">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: false, amount: 0.2 }}
+            variants={fadeUp}
+            className="mb-10"
+          >
             <p className="flex items-center gap-2 text-xs font-mono uppercase text-white/50 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-white/50 inline-block" />
               Projects
@@ -125,7 +151,7 @@ export default function Projects() {
                 </button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {loading ? (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -136,12 +162,18 @@ export default function Projects() {
               {moreProjects.length === 0 ? "No projects yet." : "No projects match the selected filters."}
             </p>
           ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: false, amount: 0.1 }}
+              variants={stagger}
+              className="grid sm:grid-cols-2 md:grid-cols-3 gap-6"
+            >
               {filteredProjects.map((project) => (
+                <motion.div key={project.id} variants={fadeUp} className="h-full">
                 <Link
-                  key={project.id}
                   to={`/projects/${project.slug}`}
-                  className="rounded-2xl border border-white/10 bg-white overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform duration-300 block no-underline"
+                  className="rounded-2xl border border-white/10 bg-white overflow-hidden cursor-pointer hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full no-underline"
                 >
                   {project.img ? (
                     <div className="aspect-[4/3] overflow-hidden group">
@@ -162,7 +194,7 @@ export default function Projects() {
                   ) : (
                     <div className="aspect-[4/3] bg-black/5" />
                   )}
-                  <div className="p-6 space-y-2">
+                  <div className="p-6 space-y-2 flex-1">
                     <div className="flex flex-wrap gap-1.5">
                       {project.tags.map((tag) => (
                         <span
@@ -177,8 +209,9 @@ export default function Projects() {
                     <p className="text-sm text-foreground/60 leading-relaxed">{project.description}</p>
                   </div>
                 </Link>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </Container>
       </section>

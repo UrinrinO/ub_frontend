@@ -202,7 +202,7 @@ export default function Home() {
             <motion.div
               initial="hidden"
               whileInView="show"
-              viewport={{ once: true, amount: 0.2 }}
+              viewport={{ once: false, amount: 0.2 }}
               variants={fade}
               custom={1}
               className="rounded-3xl overflow-hidden aspect-[3/4] group order-last md:order-first"
@@ -218,7 +218,7 @@ export default function Home() {
             <motion.div
               initial="hidden"
               whileInView="show"
-              viewport={{ once: true, amount: 0.2 }}
+              viewport={{ once: false, amount: 0.2 }}
               variants={fadeUp}
               className="space-y-6 order-first md:order-last"
             >
@@ -262,7 +262,7 @@ export default function Home() {
           <motion.div
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: false, amount: 0.2 }}
             variants={fadeUp}
             className="mb-12"
           >
@@ -289,7 +289,7 @@ export default function Home() {
           <motion.div
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0.1 }}
+            viewport={{ once: false, amount: 0.1 }}
             variants={sectionReveal}
             className="grid grid-cols-1 md:grid-cols-5 gap-4"
           >

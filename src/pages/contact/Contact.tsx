@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import Container from "../../components/layout/Container";
+import { fadeUp } from "../../lib/motion";
 
 const contactLinks = [
   {
@@ -25,7 +27,13 @@ export default function Contact() {
         <div className="grid lg:grid-cols-[2fr_3fr] gap-8 lg:gap-16 items-start">
 
           {/* LEFT — info */}
-          <div className="space-y-10 lg:sticky lg:top-28">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: false, amount: 0.2 }}
+            variants={fadeUp}
+            className="space-y-10 lg:sticky lg:top-28"
+          >
             <div className="space-y-5">
               <p className="font-mono text-xs uppercase tracking-wide text-foreground/50">
                 Contact
@@ -63,10 +71,17 @@ export default function Contact() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* RIGHT — form */}
-          <div className="bg-foreground rounded-2xl p-6 sm:p-8 space-y-6">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: false, amount: 0.2 }}
+            variants={fadeUp}
+            custom={1}
+            className="bg-foreground rounded-2xl p-6 sm:p-8 space-y-6"
+          >
             <div className="space-y-1">
               <h2 className="font-semibold text-white/90">
                 Send a message
@@ -113,7 +128,7 @@ export default function Contact() {
               <span className="absolute inset-0 rounded-full bg-black/[0.06] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-none" />
               <span className="relative z-10">Send Message →</span>
             </button>
-          </div>
+          </motion.div>
 
         </div>
       </Container>

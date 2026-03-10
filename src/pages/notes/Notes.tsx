@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { notesApi, type NotesSeries } from "../../lib/adminApi";
 import Container from "../../components/layout/Container";
+import { fadeUp, stagger } from "../../lib/motion";
 
 export default function Notes() {
   const [series, setSeries] = useState<NotesSeries[]>([]);
@@ -16,15 +18,22 @@ export default function Notes() {
       {/* Hero */}
       <section className="py-24 border-b border-black/8">
         <Container>
-          <p className="font-mono text-xs uppercase tracking-widest text-foreground/40 mb-3">
-            Engineering Notes
-          </p>
-          <h1 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] text-foreground/90 leading-tight max-w-2xl">
-            Build logs from the production floor.
-          </h1>
-          <p className="mt-6 text-base text-foreground/60 leading-relaxed max-w-lg">
-            Long-form series documenting real systems as they're built — architecture decisions, implementation detail, and the thinking behind each step.
-          </p>
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: false, amount: 0.2 }}
+            variants={fadeUp}
+          >
+            <p className="font-mono text-xs uppercase tracking-widest text-foreground/40 mb-3">
+              Engineering Notes
+            </p>
+            <h1 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] text-foreground/90 leading-tight max-w-2xl">
+              Build logs from the production floor.
+            </h1>
+            <p className="mt-6 text-base text-foreground/60 leading-relaxed max-w-lg">
+              Long-form series documenting real systems as they're built — architecture decisions, implementation detail, and the thinking behind each step.
+            </p>
+          </motion.div>
         </Container>
       </section>
 
@@ -40,8 +49,15 @@ export default function Notes() {
           ) : series.length === 0 ? (
             <p className="text-foreground/40 text-sm">No series published yet.</p>
           ) : (
-            <div className="space-y-0">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: false, amount: 0.1 }}
+              variants={stagger}
+              className="space-y-0"
+            >
               {series.map((s, i) => (
+                <motion.div key={s.id} variants={fadeUp}>
                 <Link
                   key={s.id}
                   to={s.parts[0] ? `/engineering-notes/${s.slug}/${s.parts[0].slug}` : `/engineering-notes/${s.slug}`}
@@ -73,8 +89,9 @@ export default function Notes() {
                     </div>
                   </div>
                 </Link>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </Container>
       </section>
