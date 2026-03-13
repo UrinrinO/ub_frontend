@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "../../components/ui/Toast";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "../../store/store";
@@ -14,7 +14,8 @@ import {
 import Container from "../../components/layout/Container";
 import { trackerApi } from "./tracker.api";
 import { getMondayYYYYMMDD } from "./tracker.utils";
-import type { Category } from "./tracker.types";
+import type { Category, SessionNote } from "./tracker.types";
+import { remindersApi, type Reminder } from "../../lib/reminders.api";
 import ClockOutForm from "./ClockOutForm";
 import { usePiP } from "./usePiP";
 
@@ -39,6 +40,18 @@ export default function Tracker() {
     useState<Category>("ALGORITHMS");
   const [categories, setCategories] = useState<{ key: string; label: string }[]>([]);
 
+  // Reminders
+  const [urgentReminders, setUrgentReminders] = useState<Reminder[]>([]);
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+
+  // Session notes
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionNotes, setSessionNotes] = useState<SessionNote[]>([]);
+  const [noteContent, setNoteContent] = useState("");
+  const [noteUrl, setNoteUrl] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
+  const noteInputRef = useRef<HTMLTextAreaElement>(null);
+
   const { openPiP, isPiPOpen } = usePiP();
   const toast = useToast();
 
@@ -53,6 +66,8 @@ export default function Tracker() {
           dispatch(sessionLoaded(null));
           return;
         }
+        setSessionId(session.id);
+        setSessionNotes(session.notes ?? []);
         const elapsed = session.segments.reduce((sum, seg) => {
           const start = new Date(seg.startTime).getTime();
           const end = seg.endTime
@@ -70,6 +85,20 @@ export default function Tracker() {
       })
       .catch(console.error);
   }, [dispatch]);
+
+  /* Load reminders, flag any due within 24h */
+  useEffect(() => {
+    remindersApi
+      .list()
+      .then((all) => {
+        const now = Date.now();
+        const in24h = 24 * 60 * 60 * 1000;
+        setUrgentReminders(
+          all.filter((r) => !r.completed && new Date(r.deadline).getTime() - now <= in24h),
+        );
+      })
+      .catch(console.error);
+  }, []);
 
   /* Load week report */
   useEffect(() => {
@@ -123,10 +152,40 @@ export default function Tracker() {
 
   async function handleClockIn() {
     try {
-      await trackerApi.clockIn(selectedCategory);
+      const session = await trackerApi.clockIn(selectedCategory);
+      setSessionId(session.id);
+      setSessionNotes([]);
       dispatch(clockedIn(selectedCategory));
     } catch (e) {
       console.error(e);
+      toast.error(String(e));
+    }
+  }
+
+  async function handleAddNote() {
+    if (!sessionId || !noteContent.trim()) return;
+    setSavingNote(true);
+    try {
+      const note = await trackerApi.addSessionNote(sessionId, {
+        content: noteContent.trim(),
+        url: noteUrl.trim() || undefined,
+      });
+      setSessionNotes((prev) => [...prev, note]);
+      setNoteContent("");
+      setNoteUrl("");
+      noteInputRef.current?.focus();
+    } catch (e) {
+      toast.error(String(e));
+    } finally {
+      setSavingNote(false);
+    }
+  }
+
+  async function handleDeleteNote(id: string) {
+    try {
+      await trackerApi.deleteSessionNote(id);
+      setSessionNotes((prev) => prev.filter((n) => n.id !== id));
+    } catch (e) {
       toast.error(String(e));
     }
   }
@@ -189,6 +248,39 @@ export default function Tracker() {
   return (
     <div className="pt-24 pb-20 bg-[#f6f5f2] min-h-screen">
       <Container>
+        {/* REMINDER ALERTS */}
+        {urgentReminders
+          .filter((r) => !dismissedAlerts.has(r.id))
+          .map((r) => {
+            const overdue = new Date(r.deadline).getTime() < Date.now();
+            return (
+              <div
+                key={r.id}
+                className={`mb-4 flex items-start justify-between gap-4 px-5 py-4 border font-mono text-sm ${
+                  overdue
+                    ? "border-red-300 bg-red-50 text-red-800"
+                    : "border-yellow-300 bg-yellow-50 text-yellow-800"
+                }`}
+              >
+                <div className="space-y-0.5">
+                  <p className="font-semibold uppercase tracking-wide text-xs">
+                    {overdue ? "⚠ Overdue" : "⏰ Due within 24h"}
+                  </p>
+                  <p>{r.title}</p>
+                  <p className="text-xs opacity-60">
+                    {new Date(r.deadline).toLocaleString()}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setDismissedAlerts((s) => new Set(s).add(r.id))}
+                  className="shrink-0 opacity-40 hover:opacity-80 transition text-lg leading-none"
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })}
+
         {/* HEADER */}
         <div className="flex items-end justify-between mb-10">
           <div className="space-y-2">
@@ -246,6 +338,76 @@ export default function Tracker() {
                       {cat.label}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Session notes — visible when a session is in progress */}
+            {status !== "IDLE" && !showClockOutForm && (
+              <div className="pt-6 border-t border-black/10 space-y-4">
+                <p className="font-mono text-xs uppercase tracking-widest text-black/50">
+                  Session Notes
+                </p>
+
+                {/* Existing notes */}
+                {sessionNotes.length > 0 && (
+                  <ul className="space-y-2">
+                    {sessionNotes.map((n) => (
+                      <li
+                        key={n.id}
+                        className="flex items-start gap-3 text-sm border border-black/8 bg-[#f6f5f2] px-4 py-3"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-black/80 break-words">{n.content}</p>
+                          {n.url && (
+                            <a
+                              href={n.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-mono text-xs text-blue-600 hover:underline break-all"
+                            >
+                              {n.url}
+                            </a>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleDeleteNote(n.id)}
+                          className="shrink-0 text-black/25 hover:text-red-500 transition font-mono text-sm"
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Add note form */}
+                <div className="space-y-2">
+                  <textarea
+                    ref={noteInputRef}
+                    value={noteContent}
+                    onChange={(e) => setNoteContent(e.target.value)}
+                    placeholder="Note or job application detail..."
+                    rows={2}
+                    className="w-full border border-black/15 bg-[#f6f5f2] px-4 py-3 text-sm font-mono resize-none focus:outline-none focus:border-black/40 placeholder:text-black/30"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleAddNote();
+                    }}
+                  />
+                  <input
+                    type="url"
+                    value={noteUrl}
+                    onChange={(e) => setNoteUrl(e.target.value)}
+                    placeholder="Link (optional)"
+                    className="w-full border border-black/15 bg-[#f6f5f2] px-4 py-2 text-sm font-mono focus:outline-none focus:border-black/40 placeholder:text-black/30"
+                  />
+                  <button
+                    onClick={handleAddNote}
+                    disabled={!noteContent.trim() || savingNote}
+                    className="px-5 py-2 bg-black text-white font-mono text-xs hover:opacity-90 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    {savingNote ? "Saving..." : "+ Add Note"}
+                  </button>
                 </div>
               </div>
             )}

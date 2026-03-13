@@ -47,10 +47,28 @@ export default function Home() {
       {/* HERO */}
       <section className="overflow-hidden">
         {/* ── Desktop ── */}
-        <div className="hidden md:flex relative h-[calc(100vh-80px)]">
+        <div className="hidden md:flex relative h-[calc(100vh-80px)] overflow-hidden">
+          {/* Background portrait — bleeds from right, z-index under text */}
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={fade}
+            custom={1}
+            className="absolute inset-y-0 right-0 w-[62%] pr-16 z-0"
+          >
+            <img
+              src={Uri}
+              alt="Portrait of Uri"
+              className="w-full h-full object-cover object-top"
+            />
+            {/* Blend gradient: fades image into page background on the left */}
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+          </motion.div>
+
+          {/* Text content — above image */}
+          <div className="relative z-10 w-full">
           <Container>
             <div className="flex h-full">
-              {/* Left: text content */}
               <div className="flex flex-col justify-center gap-10 flex-1 pr-12">
                 <motion.div
                   initial="hidden"
@@ -104,39 +122,22 @@ export default function Home() {
                   )}
                 </motion.div>
               </div>
-
-              {/* Right: portrait with margin from right and bottom */}
-              <motion.div
-                initial="hidden"
-                animate="show"
-                variants={fade}
-                custom={1}
-                className="relative w-[40%] flex-shrink-0 pt-8 pb-14 pr-8"
-              >
-                {/* Portrait image — rounded, fills padded area */}
-                <div className="relative h-full rounded-3xl overflow-hidden">
-                  <img
-                    src={Uri}
-                    alt="Portrait of Uri"
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-
-                {/* Floating stat card — outside overflow-hidden, bottom-right */}
-                <div className="absolute bottom-10 right-4 bg-white rounded-2xl shadow-xl p-5 w-44">
-                  <p className="font-display text-4xl text-foreground">9+</p>
-                  <p className="text-xs text-foreground/60 mt-1 leading-snug">
-                    Years building
-                    <br />
-                    production systems
-                  </p>
-                </div>
-              </motion.div>
             </div>
           </Container>
+          </div>
+
+          {/* Floating stat card */}
+          <div className="absolute bottom-10 right-20 z-10 bg-white rounded-2xl shadow-xl p-5 w-44">
+            <p className="font-display text-4xl text-foreground">9+</p>
+            <p className="text-xs text-foreground/60 mt-1 leading-snug">
+              Years building
+              <br />
+              production systems
+            </p>
+          </div>
 
           {/* Vertical scroll indicator */}
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3">
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-10">
             <span className="text-[10px] tracking-[0.3em] text-foreground/30 font-mono uppercase [writing-mode:vertical-rl]">
               Scroll
             </span>

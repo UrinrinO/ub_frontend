@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { blogApi, projectsApi, categoryApi, type BlogPost, type Project, type TrackerCategory } from "../../lib/adminApi";
 import { trackerApi } from "../tracker/tracker.api";
 import { getMondayYYYYMMDD } from "../tracker/tracker.utils";
+import { remindersApi, type Reminder } from "../../lib/reminders.api";
 
 function fmtMins(mins: number) {
   const h = Math.floor(mins / 60);
@@ -20,8 +21,19 @@ export default function Dashboard() {
   const [newTarget, setNewTarget] = useState<number>(0);
   const [adding, setAdding] = useState(false);
 
+  // Reminders
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [addingReminder, setAddingReminder] = useState(false);
+  const [rTitle, setRTitle] = useState("");
+  const [rNotes, setRNotes] = useState("");
+  const [rDeadline, setRDeadline] = useState("");
+
   function refreshCategories() {
     categoryApi.list().then(setCategories).catch(() => {});
+  }
+
+  function refreshReminders() {
+    remindersApi.list().then(setReminders).catch(() => {});
   }
 
   useEffect(() => {
@@ -32,6 +44,7 @@ export default function Dashboard() {
       .then((w) => setWeekHours(Math.round((w.totalMinutes / 60) * 10) / 10))
       .catch(() => {});
     refreshCategories();
+    refreshReminders();
   }, []);
 
   async function handleAddCategory() {
@@ -55,6 +68,23 @@ export default function Dashboard() {
   async function handleDelete(id: string) {
     await categoryApi.delete(id);
     refreshCategories();
+  }
+
+  async function handleAddReminder() {
+    if (!rTitle.trim() || !rDeadline) return;
+    await remindersApi.create({ title: rTitle.trim(), notes: rNotes.trim() || undefined, deadline: rDeadline });
+    setRTitle(""); setRNotes(""); setRDeadline(""); setAddingReminder(false);
+    refreshReminders();
+  }
+
+  async function handleCompleteReminder(r: Reminder) {
+    await remindersApi.update(r.id, { completed: !r.completed });
+    refreshReminders();
+  }
+
+  async function handleDeleteReminder(id: string) {
+    await remindersApi.delete(id);
+    refreshReminders();
   }
 
   const published = posts.filter((p) => p.published).length;
@@ -163,6 +193,98 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Reminders */}
+      <div className="bg-white rounded-2xl border border-black/8 p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-foreground/80">Reminders</h2>
+          <button
+            onClick={() => setAddingReminder((v) => !v)}
+            className="text-xs font-mono text-foreground/50 hover:text-foreground/80 transition"
+          >
+            {addingReminder ? "Cancel" : "+ Add"}
+          </button>
+        </div>
+
+        {addingReminder && (
+          <div className="flex flex-wrap gap-2 mb-4 p-3 bg-black/3 rounded-xl">
+            <input
+              placeholder="Title *"
+              value={rTitle}
+              onChange={(e) => setRTitle(e.target.value)}
+              className="border border-black/10 px-3 py-1.5 font-mono text-sm bg-white rounded focus:outline-none focus:border-black/30 flex-1 min-w-40"
+            />
+            <input
+              placeholder="Notes (optional)"
+              value={rNotes}
+              onChange={(e) => setRNotes(e.target.value)}
+              className="border border-black/10 px-3 py-1.5 font-mono text-sm bg-white rounded focus:outline-none focus:border-black/30 flex-1 min-w-40"
+            />
+            <input
+              type="datetime-local"
+              value={rDeadline}
+              onChange={(e) => setRDeadline(e.target.value)}
+              className="border border-black/10 px-3 py-1.5 font-mono text-sm bg-white rounded focus:outline-none focus:border-black/30"
+            />
+            <button
+              onClick={handleAddReminder}
+              className="px-4 py-1.5 bg-black text-white font-mono text-sm rounded hover:opacity-80 transition"
+            >
+              Add →
+            </button>
+          </div>
+        )}
+
+        {reminders.length === 0 ? (
+          <p className="text-sm text-foreground/40 py-2">No reminders set.</p>
+        ) : (
+          <div className="space-y-2">
+            {reminders.map((r) => {
+              const overdue = !r.completed && new Date(r.deadline).getTime() < Date.now();
+              const urgent = !r.completed && !overdue && new Date(r.deadline).getTime() - Date.now() <= 24 * 60 * 60 * 1000;
+              return (
+                <div
+                  key={r.id}
+                  className={`flex items-start gap-3 p-3 rounded-xl border ${
+                    r.completed
+                      ? "border-black/5 opacity-40"
+                      : overdue
+                      ? "border-red-200 bg-red-50"
+                      : urgent
+                      ? "border-yellow-200 bg-yellow-50"
+                      : "border-black/8"
+                  }`}
+                >
+                  <button
+                    onClick={() => handleCompleteReminder(r)}
+                    className={`mt-0.5 w-4 h-4 rounded border shrink-0 transition ${
+                      r.completed ? "bg-black border-black" : "border-black/30 hover:border-black"
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-mono ${r.completed ? "line-through" : "text-foreground/80"}`}>
+                      {r.title}
+                    </p>
+                    {r.notes && (
+                      <p className="text-xs text-foreground/50 mt-0.5">{r.notes}</p>
+                    )}
+                    <p className={`text-xs mt-0.5 font-mono ${overdue ? "text-red-500" : urgent ? "text-yellow-600" : "text-foreground/40"}`}>
+                      {overdue ? "⚠ Overdue · " : urgent ? "⏰ Due soon · " : ""}
+                      {new Date(r.deadline).toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteReminder(r.id)}
+                    className="text-xs font-mono text-black/30 hover:text-red-500 transition px-1"
+                  >
+                    ×
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">

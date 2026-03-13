@@ -1,5 +1,13 @@
 export type Category = string;
 
+export interface SessionNote {
+  id: string;
+  sessionId: string;
+  content: string;
+  url: string | null;
+  createdAt: string;
+}
+
 export interface TrackerCategory {
   id: string;
   key: string;
@@ -28,6 +36,7 @@ export interface WorkSession {
   difficulty?: number;
   focus?: number;
   segments: WorkSegment[];
+  notes: SessionNote[];
 }
 
 export interface ReportNotes {
@@ -110,6 +119,7 @@ export interface WeekReport {
     output?: string;
     difficulty?: number;
     focus?: number;
+    notes: SessionNote[];
     minutes: number;
   }>;
 }
