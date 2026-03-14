@@ -247,8 +247,8 @@ export default function Tracker() {
 
   return (
     <div className="pt-24 pb-20 bg-[#f6f5f2] min-h-screen">
-      <Container>
-        {/* REMINDER ALERTS */}
+      {/* REMINDER TOASTS — chat-bubble style, fixed bottom-right */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 pointer-events-none">
         {urgentReminders
           .filter((r) => !dismissedAlerts.has(r.id))
           .map((r) => {
@@ -256,31 +256,51 @@ export default function Tracker() {
             return (
               <div
                 key={r.id}
-                className={`mb-4 flex items-start justify-between gap-4 px-5 py-4 border font-mono text-sm ${
-                  overdue
-                    ? "border-red-300 bg-red-50 text-red-800"
-                    : "border-yellow-300 bg-yellow-50 text-yellow-800"
-                }`}
+                className="pointer-events-auto relative w-72 bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] px-5 py-4"
+                style={{ borderBottomRightRadius: "4px" }}
               >
-                <div className="space-y-0.5">
-                  <p className="font-semibold uppercase tracking-wide text-xs">
-                    {overdue ? "⚠ Overdue" : "⏰ Due within 24h"}
+                {/* Colour accent bar */}
+                <div
+                  className={`absolute left-0 top-4 bottom-4 w-0.75 rounded-full ${
+                    overdue ? "bg-red-400" : "bg-amber-400"
+                  }`}
+                />
+
+                <div className="pl-3 pr-6">
+                  {/* Label line */}
+                  <p className={`text-[10px] font-mono font-semibold uppercase tracking-widest mb-1.5 ${
+                    overdue ? "text-red-400" : "text-amber-500"
+                  }`}>
+                    {overdue ? "Overdue" : "Due within 24h"}
                   </p>
-                  <p>{r.title}</p>
-                  <p className="text-xs opacity-60">
+
+                  {/* Title */}
+                  <p className="text-sm font-semibold text-black/85 leading-snug mb-1">
+                    {r.title}
+                  </p>
+
+                  {/* Deadline */}
+                  <p className="text-xs text-black/35">
                     {new Date(r.deadline).toLocaleString()}
                   </p>
                 </div>
+
+                {/* Close button */}
                 <button
                   onClick={() => setDismissedAlerts((s) => new Set(s).add(r.id))}
-                  className="shrink-0 opacity-40 hover:opacity-80 transition text-lg leading-none"
+                  className="absolute top-3 right-3 text-black/25 hover:text-black/60 transition"
+                  aria-label="Dismiss"
                 >
-                  ×
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                  </svg>
                 </button>
               </div>
             );
           })}
+      </div>
 
+      <Container>
         {/* HEADER */}
         <div className="flex items-end justify-between mb-10">
           <div className="space-y-2">
