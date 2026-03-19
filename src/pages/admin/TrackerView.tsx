@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { trackerApi } from "../tracker/tracker.api";
 import { getMondayYYYYMMDD } from "../tracker/tracker.utils";
 import type { WeekReport } from "../tracker/tracker.types";
+import { useToast } from "../../components/ui/Toast";
 
 function fmt(mins: number) {
   const h = Math.floor(mins / 60);
@@ -11,11 +12,45 @@ function fmt(mins: number) {
 }
 
 export default function TrackerView() {
+  const toast = useToast();
   const [week, setWeek] = useState<WeekReport | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editMinutes, setEditMinutes] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
     trackerApi.getWeek(getMondayYYYYMMDD()).then(setWeek).catch(() => {});
   }, []);
+
+  function startEdit(sessionId: string, currentMinutes: number) {
+    setEditingId(sessionId);
+    setEditMinutes(String(currentMinutes));
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditMinutes("");
+  }
+
+  async function submitEdit(sessionId: string) {
+    const mins = parseInt(editMinutes, 10);
+    if (isNaN(mins) || mins < 0) {
+      toast.error("Enter a valid number of minutes.");
+      return;
+    }
+    setEditSaving(true);
+    try {
+      await trackerApi.adjustSessionDuration(sessionId, mins);
+      const updated = await trackerApi.getWeek(getMondayYYYYMMDD());
+      setWeek(updated);
+      setEditingId(null);
+      toast.success("Duration updated.");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to update.");
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   return (
     <div className="p-8 max-w-4xl">
@@ -104,21 +139,73 @@ export default function TrackerView() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5">
-                {week.sessions.map((s) => (
-                  <tr key={s.id} className="hover:bg-black/[0.02]">
-                    <td className="px-6 py-3 text-foreground/50 text-xs font-mono whitespace-nowrap">
-                      {new Date(s.startedAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-3">
-                      <span className="font-mono text-xs uppercase tracking-wide text-foreground/60">
-                        {s.category.replace(/_/g, " ")}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-foreground/60">{fmt(s.minutes)}</td>
-                    <td className="px-6 py-3 text-foreground/60">{s.focus}/5</td>
-                    <td className="px-6 py-3 text-foreground/50 max-w-[200px] truncate text-xs">{s.output}</td>
-                  </tr>
-                ))}
+                {week.sessions.map((s, i) => {
+                  const isLast = i === week.sessions.length - 1;
+                  const isEditing = editingId === s.id;
+                  return (
+                    <tr key={s.id} className="hover:bg-black/2">
+                      <td className="px-6 py-3 text-foreground/50 text-xs font-mono whitespace-nowrap">
+                        {new Date(s.startedAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-3">
+                        <span className="font-mono text-xs uppercase tracking-wide text-foreground/60">
+                          {s.category.replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-foreground/60">
+                        {isEditing ? (
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min={0}
+                                value={editMinutes}
+                                onChange={(e) => setEditMinutes(e.target.value)}
+                                className="w-20 px-2 py-1 text-sm border border-black/20 rounded focus:outline-none focus:border-black/40"
+                                disabled={editSaving}
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") submitEdit(s.id);
+                                  if (e.key === "Escape") cancelEdit();
+                                }}
+                              />
+                              <span className="text-foreground/40 text-xs">min</span>
+                              <button
+                                onClick={() => submitEdit(s.id)}
+                                disabled={editSaving}
+                                className="text-xs px-2 py-1 rounded bg-foreground text-background hover:bg-foreground/80 transition disabled:opacity-50"
+                              >
+                                {editSaving ? "…" : "Save"}
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                disabled={editSaving}
+                                className="text-xs px-2 py-1 rounded border border-black/15 text-foreground/50 hover:border-black/30 transition"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            {fmt(s.minutes)}
+                            {isLast && (
+                              <button
+                                onClick={() => startEdit(s.id, s.minutes)}
+                                className="text-foreground/30 hover:text-foreground/60 transition text-xs"
+                                title="Adjust duration"
+                              >
+                                ✎
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-foreground/60">{s.focus}/5</td>
+                      <td className="px-6 py-3 text-foreground/50 max-w-50 truncate text-xs">{s.output}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

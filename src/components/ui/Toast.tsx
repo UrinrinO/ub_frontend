@@ -7,9 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { RiCloseLine, RiErrorWarningLine, RiInformationLine, RiAlertLine } from "@remixicon/react";
+import { RiCloseLine, RiErrorWarningLine, RiInformationLine, RiAlertLine, RiCheckLine } from "@remixicon/react";
 
-type ToastType = "error" | "warning" | "info";
+type ToastType = "error" | "warning" | "info" | "success";
 
 interface ToastItem {
   id: number;
@@ -36,6 +36,11 @@ const STYLES: Record<ToastType, { wrapper: string; icon: string; IconComp: typeo
     wrapper: "bg-foreground border-white/10 text-white/90",
     icon: "text-white/60",
     IconComp: RiInformationLine,
+  },
+  success: {
+    wrapper: "bg-green-50 border-green-200 text-green-800",
+    icon: "text-green-500",
+    IconComp: RiCheckLine,
   },
 };
 
@@ -89,6 +94,7 @@ export function useToast() {
       error: (msg: string) => add("error", msg),
       warning: (msg: string) => add("warning", msg),
       info: (msg: string) => add("info", msg),
+      success: (msg: string) => add("success", msg),
     }),
     [add],
   );

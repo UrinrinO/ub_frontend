@@ -121,5 +121,10 @@ export interface WeekReport {
     focus?: number;
     notes: SessionNote[];
     minutes: number;
+    durationEdits?: Array<{
+      previousMinutes: number;
+      newMinutes: number;
+      createdAt: string;
+    }>;
   }>;
 }

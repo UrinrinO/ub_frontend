@@ -69,6 +69,7 @@ export default function ClockOutForm({ seconds, minMinutes = 25 }: Props) {
       const week = await trackerApi.getWeek(getMondayYYYYMMDD());
       dispatch(weekLoaded(week));
       dispatch(reset());
+      toast.success("Session completed and saved.");
     } catch (e) {
       toast.error(String(e));
     } finally {

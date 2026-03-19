@@ -2,7 +2,17 @@ import { API_URL } from "../../lib/api";
 import type { WeekReport, WorkSession, TrackerCategory, SessionNote } from "./tracker.types";
 
 async function json<T>(res: Response): Promise<T> {
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    const text = await res.text();
+    let message = text;
+    try {
+      const body = JSON.parse(text);
+      if (body.error) message = body.error;
+    } catch {
+      // keep raw text
+    }
+    throw new Error(message);
+  }
   return res.json();
 }
 
@@ -96,5 +106,13 @@ export const trackerApi = {
     return fetch(`${API_URL}/api/tracker/notes/${id}`, { method: "DELETE" }).then((res) =>
       json<{ ok: boolean }>(res),
     );
+  },
+
+  adjustSessionDuration(sessionId: string, minutes: number) {
+    return fetch(`${API_URL}/api/tracker/sessions/${sessionId}/duration`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ minutes }),
+    }).then((res) => json<WorkSession>(res));
   },
 };

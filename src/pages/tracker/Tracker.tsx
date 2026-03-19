@@ -52,8 +52,24 @@ export default function Tracker() {
   const [savingNote, setSavingNote] = useState(false);
   const noteInputRef = useRef<HTMLTextAreaElement>(null);
 
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingMinutes, setEditingMinutes] = useState<string>("");
+  const [editingCurrentMinutes, setEditingCurrentMinutes] = useState<number | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [lastEdit, setLastEdit] = useState<{
+    sessionId: string;
+    previousMinutes: number;
+    newMinutes: number;
+  } | null>(null);
+
   const { openPiP, isPiPOpen } = usePiP();
   const toast = useToast();
+
+  useEffect(() => {
+    if (!lastEdit) return;
+    const id = window.setTimeout(() => setLastEdit(null), 20000);
+    return () => window.clearTimeout(id);
+  }, [lastEdit]);
 
   const running = status === "ACTIVE";
 
@@ -190,6 +206,81 @@ export default function Tracker() {
     }
   }
 
+  async function refreshWeek() {
+    try {
+      const w = await trackerApi.getWeek(getMondayYYYYMMDD());
+      dispatch(weekLoaded(w));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function openEditSession(sessionId: string, currentMinutes: number) {
+    setEditingSessionId(sessionId);
+    setEditingMinutes(String(currentMinutes));
+    setEditingCurrentMinutes(currentMinutes);
+  }
+
+  function closeEditSession() {
+    setEditingSessionId(null);
+    setEditingMinutes("");
+    setEditingCurrentMinutes(null);
+  }
+
+  async function handleSaveEditedDuration() {
+    if (!editingSessionId || editingCurrentMinutes === null) return;
+    const minutes = Number(editingMinutes);
+    if (!Number.isInteger(minutes) || minutes < 0) {
+      toast.error("Enter a valid number of minutes.");
+      return;
+    }
+
+    const delta = minutes - editingCurrentMinutes;
+    const maxDelta = 60;
+    if (Math.abs(delta) > maxDelta) {
+      toast.error(`Adjustment must be within ±${maxDelta} minutes.`);
+      return;
+    }
+
+    const minAllowed = Math.max(1, editingCurrentMinutes - maxDelta);
+    if (minutes < minAllowed) {
+      toast.error(`Minimum allowed is ${minAllowed} minutes.`);
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      await trackerApi.adjustSessionDuration(editingSessionId, minutes);
+      setLastEdit({
+        sessionId: editingSessionId,
+        previousMinutes: editingCurrentMinutes,
+        newMinutes: minutes,
+      });
+      toast.info("Session duration updated.");
+      await refreshWeek();
+      closeEditSession();
+    } catch (e) {
+      toast.error(String(e));
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function handleUndoLastEdit() {
+    if (!lastEdit) return;
+    setSavingEdit(true);
+    try {
+      await trackerApi.adjustSessionDuration(lastEdit.sessionId, lastEdit.previousMinutes);
+      toast.info("Undo successful.");
+      await refreshWeek();
+      setLastEdit(null);
+    } catch (e) {
+      toast.error(String(e));
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
   async function handlePause() {
     try {
       await trackerApi.pause();
@@ -233,6 +324,11 @@ export default function Tracker() {
         (s) => new Date(s.startedAt).toDateString() === todayDate,
       )
       .reduce((sum, s) => sum + s.minutes, 0) ?? 0;
+
+  const lastSessionId = week?.sessions?.[week.sessions.length - 1]?.id ?? null;
+  const editingSession = editingSessionId
+    ? week?.sessions.find((s) => s.id === editingSessionId)
+    : null;
 
   /* Loading state */
   if (loading) {
@@ -301,6 +397,21 @@ export default function Tracker() {
       </div>
 
       <Container>
+        {lastEdit && (
+          <div className="mb-6 rounded-xl border border-black/10 bg-white px-6 py-4 flex items-center justify-between">
+            <div className="text-sm text-black/80">
+              Updated last session: {lastEdit.previousMinutes}m → {lastEdit.newMinutes}m
+            </div>
+            <button
+              onClick={handleUndoLastEdit}
+              disabled={savingEdit}
+              className="px-4 py-2 border border-black/15 text-sm font-mono text-black/60 hover:border-black/40 hover:text-black transition disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Undo
+            </button>
+          </div>
+        )}
+
         {/* HEADER */}
         <div className="flex items-end justify-between mb-10">
           <div className="space-y-2">
@@ -576,11 +687,86 @@ export default function Tracker() {
                   duration={`${s.minutes}m`}
                   focus={`${s.focus ?? "-"} / 5`}
                   output={s.output ?? ""}
+                  isEditable={s.id === lastSessionId}
+                  onEdit={() => openEditSession(s.id, s.minutes)}
                 />
               ))}
             </tbody>
           </table>
         </section>
+
+        {editingSessionId && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            onClick={closeEditSession}
+          >
+            <div
+              className="bg-white border border-black/10 p-8 max-w-sm w-full mx-4 space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="space-y-2">
+                <p className="font-mono text-xs uppercase tracking-widest text-black/50">
+                  Edit duration
+                </p>
+                <h2 className="font-display text-2xl leading-tight">
+                  Adjust last session
+                </h2>
+                <p className="text-black/60 text-sm">
+                  Update the total minutes for your most recent completed session.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-mono text-black/70">Minutes</label>
+                <input
+                  type="number"
+                  value={editingMinutes}
+                  onChange={(e) => setEditingMinutes(e.target.value)}
+                  min={1}
+                  className="w-full border border-black/15 px-3 py-2 text-sm font-mono focus:outline-none focus:border-black/40"
+                />
+                <p className="text-xs text-black/40">
+                  Adjust within ±60 minutes from current value.
+                </p>
+              </div>
+
+              {editingSession?.durationEdits?.length ? (
+                <div className="space-y-2 border-t border-black/10 pt-4">
+                  <p className="font-mono text-xs uppercase tracking-widest text-black/50">
+                    Edit history
+                  </p>
+                  <ul className="text-sm text-black/80 space-y-1">
+                    {editingSession.durationEdits.map((edit) => (
+                      <li key={edit.createdAt} className="flex justify-between">
+                        <span>
+                          {new Date(edit.createdAt).toLocaleString()} — {edit.previousMinutes}m → {edit.newMinutes}m
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={closeEditSession}
+                  className="px-6 py-2.5 border border-black/20 font-mono text-sm text-black/60 hover:border-black/50 hover:text-black transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveEditedDuration}
+                  disabled={savingEdit}
+                  className="px-6 py-2.5 bg-black text-white font-mono text-sm hover:opacity-90 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  {savingEdit ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Container>
     </div>
   );
@@ -636,12 +822,16 @@ function SessionRow({
   duration,
   focus,
   output,
+  isEditable,
+  onEdit,
 }: {
   date: string;
   category: string;
   duration: string;
   focus: string;
   output: string;
+  isEditable?: boolean;
+  onEdit?: () => void;
 }) {
   return (
     <tr className="border-b border-black/10 text-sm">
@@ -654,7 +844,18 @@ function SessionRow({
       <td>{duration}</td>
       <td className="text-black/60">{focus}</td>
       <td className="text-black/70">{output}</td>
-      <td className="text-black/40">×</td>
+      <td className="text-black/40">
+        {isEditable ? (
+          <button
+            onClick={onEdit}
+            className="text-black/40 hover:text-black transition font-mono text-sm"
+          >
+            Edit
+          </button>
+        ) : (
+          ""
+        )}
+      </td>
     </tr>
   );
 }
