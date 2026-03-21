@@ -594,10 +594,10 @@ export default function Tracker() {
               </p>
               <p className="font-display text-5xl leading-none">{totalHours}h</p>
               <p className="text-black/50">of 14h target</p>
-              <div className="h-[2px] bg-black/10 mt-4">
+              <div className="h-[2px] bg-black/10 mt-4 overflow-hidden">
                 <div
                   className="h-full bg-black"
-                  style={{ width: `${progressPercent}%` }}
+                  style={{ width: `${Math.min(100, progressPercent)}%` }}
                 />
               </div>
             </div>
@@ -630,10 +630,10 @@ export default function Tracker() {
             </div>
           </div>
 
-          <div className="h-[2px] bg-black/10 mb-8">
+          <div className="h-[2px] bg-black/10 mb-8 overflow-hidden">
             <div
               className="h-full bg-black"
-              style={{ width: `${progressPercent}%` }}
+              style={{ width: `${Math.min(100, progressPercent)}%` }}
             />
           </div>
 
@@ -809,7 +809,7 @@ function ProgressRow({
         <span>{name}</span>
         <span>{time}</span>
       </div>
-      <div className="h-[2px] bg-black/10">
+      <div className="h-[2px] bg-black/10 overflow-hidden">
         <div className="h-full bg-black" style={{ width }} />
       </div>
     </div>

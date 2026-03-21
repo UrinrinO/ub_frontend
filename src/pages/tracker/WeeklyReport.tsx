@@ -191,9 +191,27 @@ export default function WeeklyReport() {
   const [report, setReport] = useState<StoredWeeklyReport | null>(null);
   const [tab, setTab] = useState<"tracker" | "summation">("tracker");
   const [categories, setCategories] = useState<TrackerCategory[]>([]);
+  const [activeSession, setActiveSession] = useState<import("./tracker.types").WorkSession | null | undefined>(undefined);
+  const [lastEndedAt, setLastEndedAt] = useState<string | null>(null);
 
   useEffect(() => {
     trackerApi.getCategories().then(setCategories).catch(console.error);
+  }, []);
+
+  /* Fetch live status once on mount */
+  useEffect(() => {
+    Promise.all([
+      trackerApi.getSession(),
+      trackerApi.getWeek(getMondayYYYYMMDD()),
+    ]).then(([session, currentWeek]) => {
+      setActiveSession(session);
+      if (!session) {
+        const sorted = [...currentWeek.sessions].sort(
+          (a, b) => new Date(b.endedAt ?? 0).getTime() - new Date(a.endedAt ?? 0).getTime(),
+        );
+        setLastEndedAt(sorted[0]?.endedAt ?? null);
+      }
+    }).catch(() => setActiveSession(null));
   }, []);
 
   useEffect(() => {
@@ -223,6 +241,32 @@ export default function WeeklyReport() {
             <p className="text-lg text-black/50 mt-2">
               One Year Personal Development Plan
             </p>
+            {/* Live / last session status */}
+            {activeSession !== undefined && (
+              <div className="mt-3 inline-flex items-center gap-2">
+                {activeSession ? (
+                  <>
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                    </span>
+                    <span className="font-mono text-xs text-green-700 uppercase tracking-widest">
+                      Live — {activeSession.category.replaceAll("_", " ")} · since{" "}
+                      {new Date(activeSession.startedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="h-2 w-2 rounded-full bg-black/20" />
+                    <span className="font-mono text-xs text-black/40 uppercase tracking-widest">
+                      {lastEndedAt
+                        ? `Last session: ${new Date(lastEndedAt).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })} · ${new Date(lastEndedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`
+                        : "No sessions this week"}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -313,7 +357,7 @@ export default function WeeklyReport() {
             <div className="h-[2px] bg-black/10 mb-8">
               <div
                 className="h-full bg-black transition-all"
-                style={{ width: `${week.percent}%` }}
+                style={{ width: `${Math.min(100, week.percent)}%` }}
               />
             </div>
 

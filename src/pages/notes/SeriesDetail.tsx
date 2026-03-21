@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { notesApi, type NotesSeries } from "../../lib/adminApi";
 import Container from "../../components/layout/Container";
 
 export default function SeriesDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [series, setSeries] = useState<NotesSeries | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!slug) return;
-    notesApi.getSeriesBySlug(slug, true).then(setSeries).finally(() => setLoading(false));
-  }, [slug]);
+    notesApi.getSeriesBySlug(slug, true).then((s) => {
+      if (s.parts.length === 1) {
+        navigate(`/engineering-notes/${slug}/${s.parts[0].slug}`, { replace: true });
+      } else {
+        setSeries(s);
+      }
+    }).finally(() => setLoading(false));
+  }, [slug, navigate]);
 
   if (loading) {
     return (

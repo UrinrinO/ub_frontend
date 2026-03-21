@@ -60,7 +60,7 @@ export default function Notes() {
                 <motion.div key={s.id} variants={fadeUp}>
                 <Link
                   key={s.id}
-                  to={s.parts[0] ? `/engineering-notes/${s.slug}/${s.parts[0].slug}` : `/engineering-notes/${s.slug}`}
+                  to={s.parts.length === 1 ? `/engineering-notes/${s.slug}/${s.parts[0].slug}` : `/engineering-notes/${s.slug}`}
                   className={`group block py-10 border-t border-black/10 ${i === series.length - 1 ? "border-b" : ""}`}
                 >
                   <div className="grid md:grid-cols-[1fr_auto] gap-6 items-start">

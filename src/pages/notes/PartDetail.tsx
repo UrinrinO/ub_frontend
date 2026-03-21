@@ -10,11 +10,18 @@ type FullPart = NotesPart & { series: NotesSeries };
 export default function PartDetail() {
   const { slug, partSlug } = useParams<{ slug: string; partSlug: string }>();
   const [part, setPart] = useState<FullPart | null>(null);
+  const [seriesParts, setSeriesParts] = useState<NotesPart[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!slug || !partSlug) return;
-    notesApi.getPartBySlug(slug, partSlug, true).then(setPart).finally(() => setLoading(false));
+    Promise.all([
+      notesApi.getPartBySlug(slug, partSlug, true),
+      notesApi.getSeriesBySlug(slug, true),
+    ]).then(([p, s]) => {
+      setPart(p);
+      setSeriesParts(s.parts.slice().sort((a, b) => a.partNumber - b.partNumber));
+    }).finally(() => setLoading(false));
   }, [slug, partSlug]);
 
   if (loading) {
@@ -83,20 +90,57 @@ export default function PartDetail() {
           </div>
 
           {/* Footer nav */}
-          <div className="mt-16 pt-8 border-t border-black/8 flex items-center justify-between">
-            <Link
-              to={`/engineering-notes/${part.series.slug}`}
-              className="font-mono text-xs text-foreground/40 hover:text-foreground/70 transition"
-            >
-              ← Back to series
-            </Link>
-            <Link
-              to="/engineering-notes"
-              className="font-mono text-xs text-foreground/40 hover:text-foreground/70 transition"
-            >
-              All series →
-            </Link>
-          </div>
+          {(() => {
+            const idx = seriesParts.findIndex((p) => p.partNumber === part.partNumber);
+            const prev = idx > 0 ? seriesParts[idx - 1] : null;
+            const next = idx < seriesParts.length - 1 ? seriesParts[idx + 1] : null;
+            return (
+              <div className="mt-16 pt-8 border-t border-black/8">
+                <div className="flex items-start justify-between gap-8">
+                  <div className="flex-1">
+                    {prev ? (
+                      <Link
+                        to={`/engineering-notes/${part.series.slug}/${prev.slug}`}
+                        className="group block"
+                      >
+                        <p className="font-mono text-xs text-foreground/35 uppercase tracking-widest mb-1.5">← Previous</p>
+                        <p className="text-sm text-foreground/60 group-hover:text-foreground transition leading-snug">
+                          {prev.title}
+                        </p>
+                      </Link>
+                    ) : (
+                      <Link
+                        to={`/engineering-notes/${part.series.slug}`}
+                        className="font-mono text-xs text-foreground/40 hover:text-foreground/70 transition"
+                      >
+                        ← Back to series
+                      </Link>
+                    )}
+                  </div>
+                  <div className="flex-1 text-right">
+                    {next ? (
+                      <Link
+                        to={`/engineering-notes/${part.series.slug}/${next.slug}`}
+                        className="group block"
+                      >
+                        <p className="font-mono text-xs text-foreground/35 uppercase tracking-widest mb-1.5">Next →</p>
+                        <p className="text-sm text-foreground/60 group-hover:text-foreground transition leading-snug">
+                          {next.title}
+                        </p>
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/engineering-notes"
+                        className="font-mono text-xs text-foreground/40 hover:text-foreground/70 transition"
+                      >
+                        All series →
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </Container>
     </div>
