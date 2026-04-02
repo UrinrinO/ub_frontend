@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
+import HeroAudio from "./HeroAudio";
 
 import { motion } from "framer-motion";
 import { fadeUp, fade } from "../../lib/motion";
@@ -103,6 +104,8 @@ export default function Home() {
                     ),
                   )}
                 </motion.div>
+
+                <HeroAudio playerId="yt-audio-desktop" />
               </div>
 
               {/* Right: portrait with margin from right and bottom */}
@@ -135,13 +138,6 @@ export default function Home() {
             </div>
           </Container>
 
-          {/* Vertical scroll indicator */}
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3">
-            <span className="text-[10px] tracking-[0.3em] text-foreground/30 font-mono uppercase [writing-mode:vertical-rl]">
-              Scroll
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
-          </div>
         </div>
 
         {/* ── Mobile ── */}
@@ -190,6 +186,9 @@ export default function Home() {
               </Link>
               <Button variant="secondary">Book A Call →</Button>
             </motion.div>
+            <div className="flex justify-center">
+              <HeroAudio playerId="yt-audio-mobile" />
+            </div>
           </div>
         </div>
       </section>
