@@ -12,6 +12,7 @@ import {
   weekLoaded,
 } from "../../store/trackerSlice";
 import Container from "../../components/layout/Container";
+import WeekFocusSticky from "../../components/ui/WeekFocusSticky";
 import { trackerApi } from "./tracker.api";
 import { getMondayYYYYMMDD } from "./tracker.utils";
 import type { Category, SessionNote } from "./tracker.types";
@@ -51,6 +52,8 @@ export default function Tracker() {
   const [noteUrl, setNoteUrl] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const noteInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const [prevWeekFocus, setPrevWeekFocus] = useState<string | null>(null);
 
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingMinutes, setEditingMinutes] = useState<string>("");
@@ -123,6 +126,22 @@ export default function Tracker() {
       .then((w) => dispatch(weekLoaded(w)))
       .catch(console.error);
   }, [dispatch]);
+
+  /* Load previous week's next-week focus for sticky */
+  useEffect(() => {
+    const prevMonday = (() => {
+      const d = new Date(`${getMondayYYYYMMDD()}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() - 7);
+      return d.toISOString().slice(0, 10);
+    })();
+    trackerApi
+      .getWeeklyReport(prevMonday)
+      .then(({ report }) => {
+        const focus = (report?.notes as any)?.nextWeekFocus;
+        if (focus?.trim()) setPrevWeekFocus(focus.trim());
+      })
+      .catch(console.error);
+  }, []);
 
   /* Load categories */
   useEffect(() => {
@@ -331,7 +350,7 @@ export default function Tracker() {
     : null;
 
   /* Loading state */
-  if (loading) {
+  if (loading && !prevWeekFocus) {
     return (
       <div className="pt-24 pb-20 bg-[#f6f5f2] min-h-screen flex items-center justify-center">
         <p className="font-mono text-sm uppercase tracking-widest text-black/30">
@@ -343,6 +362,8 @@ export default function Tracker() {
 
   return (
     <div className="pt-24 pb-20 bg-[#f6f5f2] min-h-screen">
+      {prevWeekFocus && <WeekFocusSticky text={prevWeekFocus} />}
+
       {/* REMINDER TOASTS — chat-bubble style, fixed bottom-right */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 pointer-events-none">
         {urgentReminders

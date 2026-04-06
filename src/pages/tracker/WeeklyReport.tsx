@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Container from "../../components/layout/Container";
+import WeekFocusSticky from "../../components/ui/WeekFocusSticky";
 import { trackerApi } from "./tracker.api";
 import { getMondayYYYYMMDD } from "./tracker.utils";
 import type { WeekReport, StoredWeeklyReport, ReportNotes, TrackerCategory } from "./tracker.types";
@@ -193,9 +194,26 @@ export default function WeeklyReport() {
   const [categories, setCategories] = useState<TrackerCategory[]>([]);
   const [activeSession, setActiveSession] = useState<import("./tracker.types").WorkSession | null | undefined>(undefined);
   const [lastEndedAt, setLastEndedAt] = useState<string | null>(null);
+  const [prevWeekFocus, setPrevWeekFocus] = useState<string | null>(null);
 
   useEffect(() => {
     trackerApi.getCategories().then(setCategories).catch(console.error);
+  }, []);
+
+  /* Load previous week's next-week focus for sticky */
+  useEffect(() => {
+    const prevMonday = (() => {
+      const d = new Date(`${getMondayYYYYMMDD()}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() - 7);
+      return d.toISOString().slice(0, 10);
+    })();
+    trackerApi
+      .getWeeklyReport(prevMonday)
+      .then(({ report }) => {
+        const focus = (report?.notes as any)?.nextWeekFocus;
+        if (focus?.trim()) setPrevWeekFocus(focus.trim());
+      })
+      .catch(console.error);
   }, []);
 
   /* Fetch live status once on mount */
@@ -230,6 +248,7 @@ export default function WeeklyReport() {
 
   return (
     <div className="pt-24 pb-20 bg-[#f6f5f2] min-h-screen">
+      {prevWeekFocus && <WeekFocusSticky text={prevWeekFocus} />}
       <Container>
 
         {/* Header */}
