@@ -52,13 +52,13 @@ export default function WeekFocusSticky({ text }: { text: string }) {
     <div
       ref={ref}
       style={{ left: pos.x, top: pos.y }}
-      className="fixed z-40 w-[240px] select-none"
+      className="fixed z-40 w-80 select-none"
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
     >
       {/* Tape strip */}
-      <div className="flex justify-center mb-[-6px] relative z-10 pointer-events-none">
-        <div className="w-10 h-4 bg-[#d6d0b8]/70 border border-[#c8c2a8]/80 rounded-sm" />
+      <div className="flex justify-center -mb-1.5 relative z-10 pointer-events-none">
+        <div className="w-18 h-6 bg-[#d6d0b8]/70 border border-[#c8c2a8]/80 rounded-sm" />
       </div>
 
       {/* Paper */}
@@ -80,7 +80,7 @@ export default function WeekFocusSticky({ text }: { text: string }) {
           className="flex items-center justify-between px-4 pt-3 pb-2 cursor-grab active:cursor-grabbing relative"
           onPointerDown={onPointerDown}
         >
-          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-black/35">
+          <span style={{ fontFamily: "'Caveat', cursive" }} className="text-[24px] text-black/40">
             This week's focus
           </span>
           <button
@@ -99,8 +99,8 @@ export default function WeekFocusSticky({ text }: { text: string }) {
             {lines.map((line, i) => (
               <li
                 key={i}
-                className="text-[12px] leading-snug text-black/70 font-[cursive] tracking-wide"
-                style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", fontStyle: "normal" }}
+                className="text-[18px] leading-snug text-black/75 tracking-wide"
+                style={{ fontFamily: "'Caveat', cursive" }}
               >
                 {line}
               </li>
