@@ -74,6 +74,7 @@ export default function Dashboard() {
   }
 
   async function handleDelete(id: string) {
+    if (!confirm("Delete this category? This cannot be undone.")) return;
     await categoryApi.delete(id);
     refreshCategories();
   }
@@ -105,7 +106,8 @@ export default function Dashboard() {
     refreshReminders();
   }
 
-  async function handleDeleteReminder(id: string) {
+  async function handleDeleteReminder(id: string, label = "reminder") {
+    if (!confirm(`Delete this ${label}? This cannot be undone.`)) return;
     await remindersApi.delete(id);
     refreshReminders();
   }
@@ -298,7 +300,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <button
-                    onClick={() => handleDeleteReminder(r.id)}
+                    onClick={() => handleDeleteReminder(r.id, "reminder")}
                     className="text-xs font-mono text-black/30 hover:text-red-500 transition px-1"
                   >
                     ×
@@ -412,7 +414,7 @@ export default function Dashboard() {
                       ✓
                     </button>
                     <button
-                      onClick={() => handleDeleteReminder(r.id)}
+                      onClick={() => handleDeleteReminder(r.id, "exam")}
                       className="text-xs font-mono text-black/30 hover:text-red-500 transition px-1"
                     >
                       ×
