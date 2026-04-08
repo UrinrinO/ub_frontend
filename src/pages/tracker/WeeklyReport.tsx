@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import Container from "../../components/layout/Container";
 import WeekFocusSticky from "../../components/ui/WeekFocusSticky";
+import ExamAlerts from "../../components/ui/ExamAlerts";
 import { trackerApi } from "./tracker.api";
+import { remindersApi, type Reminder } from "../../lib/reminders.api";
 import { getMondayYYYYMMDD } from "./tracker.utils";
 import type { WeekReport, StoredWeeklyReport, ReportNotes, TrackerCategory } from "./tracker.types";
 
@@ -172,6 +174,16 @@ function WeeklySummation({ report }: { report: StoredWeeklyReport | null }) {
         <SummaryRow label="Current deployment state" value={n.deploymentState} />
       </SummarySection>
 
+      <SummarySection title="IELTS">
+        <div className="grid md:grid-cols-2 gap-4">
+          <SummaryRow label="Practice tests completed" value={n.ieltsTestsDone} />
+          <SummaryRow label="Score (raw / band)" value={n.ieltsScore} />
+          <SummaryRow label="Weakest section" value={n.ieltsWeakSection} />
+          <SummaryRow label="Vocabulary added" value={n.ieltsVocabAdded} />
+        </div>
+        <SummaryRow label="Notes & reflections" value={n.ieltsNote} />
+      </SummarySection>
+
       <SummarySection title="Discipline Score">
         <SummaryRow label="Score (1–10)" value={n.disciplineScore} />
         <SummaryRow label="Reasoning" value={n.disciplineReasoning} />
@@ -190,7 +202,8 @@ export default function WeeklyReport() {
   const [weekStart, setWeekStart] = useState(getMondayYYYYMMDD);
   const [week, setWeek] = useState<WeekReport | null>(null);
   const [report, setReport] = useState<StoredWeeklyReport | null>(null);
-  const [tab, setTab] = useState<"tracker" | "summation">("tracker");
+  const [tab, setTab] = useState<"tracker" | "summation" | "exams">("tracker");
+  const [exams, setExams] = useState<Reminder[]>([]);
   const [categories, setCategories] = useState<TrackerCategory[]>([]);
   const [activeSession, setActiveSession] = useState<import("./tracker.types").WorkSession | null | undefined>(undefined);
   const [lastEndedAt, setLastEndedAt] = useState<string | null>(null);
@@ -198,6 +211,7 @@ export default function WeeklyReport() {
 
   useEffect(() => {
     trackerApi.getCategories().then(setCategories).catch(console.error);
+    remindersApi.list().then((all) => setExams(all.filter((r) => r.type === "EXAM" && !r.completed))).catch(console.error);
   }, []);
 
   /* Load previous week's next-week focus for sticky */
@@ -249,6 +263,7 @@ export default function WeeklyReport() {
   return (
     <div className="pt-24 pb-20 bg-[#f6f5f2] min-h-screen">
       {prevWeekFocus && <WeekFocusSticky text={prevWeekFocus} />}
+      <ExamAlerts />
       <Container>
 
         {/* Header */}
@@ -328,9 +343,78 @@ export default function WeeklyReport() {
           >
             Weekly Summation
           </button>
+          <button
+            onClick={() => setTab("exams")}
+            className={`px-4 py-2 font-mono text-xs uppercase tracking-widest transition border-b-2 -mb-px flex items-center gap-2 ${
+              tab === "exams"
+                ? "border-black text-black"
+                : "border-transparent text-black/40 hover:text-black/60"
+            }`}
+          >
+            Exams
+            {exams.length > 0 && (
+              <span className="w-4 h-4 rounded-full bg-orange-400 text-white text-[9px] flex items-center justify-center font-mono">
+                {exams.length}
+              </span>
+            )}
+          </button>
         </div>
 
-        {tab === "summation" ? (
+        {tab === "exams" ? (
+          <div className="space-y-4">
+            {exams.length === 0 ? (
+              <p className="font-mono text-sm text-black/40">No upcoming exams.</p>
+            ) : (
+              exams
+                .slice()
+                .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+                .map((exam) => {
+                  const days = Math.ceil((new Date(exam.deadline).getTime() - Date.now()) / 86_400_000);
+                  const urgency = days > 14 ? "green" : days > 7 ? "amber" : "orange";
+                  const colors = {
+                    green:  { border: "border-emerald-200 bg-emerald-50/60", dot: "bg-emerald-400", badge: "bg-emerald-100 text-emerald-700" },
+                    amber:  { border: "border-amber-200 bg-amber-50/60",     dot: "bg-amber-400",   badge: "bg-amber-100 text-amber-700"   },
+                    orange: { border: "border-orange-200 bg-orange-50/60",   dot: "bg-orange-400",  badge: "bg-orange-100 text-orange-700" },
+                  }[urgency];
+                  return (
+                    <div key={exam.id} className={`border p-6 ${colors.border}`}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <span className={`mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 ${colors.dot}`} />
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-mono text-sm font-semibold text-black/85">{exam.title}</p>
+                              {exam.subject && (
+                                <span className="font-mono text-xs px-2 py-0.5 bg-black/8 text-black/50 rounded-full">
+                                  {exam.subject}
+                                </span>
+                              )}
+                            </div>
+                            {exam.notes && (
+                              <p className="text-sm text-black/60 mt-1 leading-relaxed">{exam.notes}</p>
+                            )}
+                            <div className="flex items-center gap-4 mt-2">
+                              <p className="font-mono text-xs text-black/40">
+                                {new Date(exam.deadline).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                              </p>
+                              {exam.url && (
+                                <a href={exam.url} target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-blue-500 hover:underline">
+                                  Resources →
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <span className={`shrink-0 font-mono text-xs font-semibold px-3 py-1 rounded-full ${colors.badge}`}>
+                          {days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `${days} days`}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+            )}
+          </div>
+        ) : tab === "summation" ? (
           !week && !report ? (
             <p className="font-mono text-sm text-black/40">Loading…</p>
           ) : (
@@ -373,7 +457,7 @@ export default function WeeklyReport() {
             </div>
 
             {/* Progress bar */}
-            <div className="h-[2px] bg-black/10 mb-8">
+            <div className="h-0.5 bg-black/10 mb-8">
               <div
                 className="h-full bg-black transition-all"
                 style={{ width: `${Math.min(100, week.percent)}%` }}
@@ -404,7 +488,7 @@ export default function WeeklyReport() {
                           {target > 0 ? ` / ${fmtMins(target)}` : ""}
                         </span>
                       </div>
-                      <div className="h-[2px] bg-black/10">
+                      <div className="h-0.5 bg-black/10">
                         <div
                           className="h-full bg-black"
                           style={{ width: `${pct}%` }}
@@ -492,13 +576,39 @@ export default function WeeklyReport() {
 
                         {/* Output */}
                         {s.output && (
-                          <div>
+                          <div className="mb-4">
                             <p className="font-mono text-xs uppercase tracking-widest text-black/40 mb-1">
                               Output
                             </p>
                             <p className="text-sm text-black/60 leading-relaxed">
                               {s.output}
                             </p>
+                          </div>
+                        )}
+
+                        {/* Session notes */}
+                        {s.notes && s.notes.length > 0 && (
+                          <div className="border-t border-black/8 pt-4 mt-2">
+                            <p className="font-mono text-xs uppercase tracking-widest text-black/40 mb-2">
+                              Notes ({s.notes.length})
+                            </p>
+                            <ul className="space-y-2">
+                              {s.notes.map((n) => (
+                                <li key={n.id} className="bg-black/3 px-4 py-2.5 text-sm text-black/70 leading-relaxed">
+                                  <p>{n.content}</p>
+                                  {n.url && (
+                                    <a
+                                      href={n.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="font-mono text-xs text-blue-600 hover:underline break-all mt-1 block"
+                                    >
+                                      {n.url}
+                                    </a>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         )}
                       </div>

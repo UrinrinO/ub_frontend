@@ -7,8 +7,11 @@ async function json<T>(res: Response): Promise<T> {
 
 export interface Reminder {
   id: string;
+  type: "REMINDER" | "EXAM";
   title: string;
   notes: string | null;
+  subject: string | null;
+  url: string | null;
   deadline: string;
   completed: boolean;
   createdAt: string;
@@ -19,7 +22,7 @@ export const remindersApi = {
     return fetch(`${API_URL}/api/reminders`).then((r) => json<Reminder[]>(r));
   },
 
-  create(data: { title: string; notes?: string; deadline: string }) {
+  create(data: { type?: string; title: string; notes?: string; subject?: string; url?: string; deadline: string }) {
     return fetch(`${API_URL}/api/reminders`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -27,7 +30,7 @@ export const remindersApi = {
     }).then((r) => json<Reminder>(r));
   },
 
-  update(id: string, data: Partial<{ title: string; notes: string; deadline: string; completed: boolean }>) {
+  update(id: string, data: Partial<{ title: string; notes: string; subject: string; url: string; deadline: string; completed: boolean }>) {
     return fetch(`${API_URL}/api/reminders/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },

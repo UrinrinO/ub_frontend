@@ -28,6 +28,14 @@ export default function Dashboard() {
   const [rNotes, setRNotes] = useState("");
   const [rDeadline, setRDeadline] = useState("");
 
+  // Exams
+  const [addingExam, setAddingExam] = useState(false);
+  const [eTitle, setETitle] = useState("");
+  const [eNotes, setENotes] = useState("");
+  const [eSubject, setESubject] = useState("");
+  const [eUrl, setEUrl] = useState("");
+  const [eDeadline, setEDeadline] = useState("");
+
   function refreshCategories() {
     categoryApi.list().then(setCategories).catch(() => {});
   }
@@ -74,6 +82,21 @@ export default function Dashboard() {
     if (!rTitle.trim() || !rDeadline) return;
     await remindersApi.create({ title: rTitle.trim(), notes: rNotes.trim() || undefined, deadline: rDeadline });
     setRTitle(""); setRNotes(""); setRDeadline(""); setAddingReminder(false);
+    refreshReminders();
+  }
+
+  async function handleAddExam() {
+    if (!eTitle.trim() || !eDeadline) return;
+    await remindersApi.create({
+      type: "EXAM",
+      title: eTitle.trim(),
+      notes: eNotes.trim() || undefined,
+      subject: eSubject.trim() || undefined,
+      url: eUrl.trim() || undefined,
+      deadline: eDeadline,
+    });
+    setETitle(""); setENotes(""); setESubject(""); setEUrl(""); setEDeadline("");
+    setAddingExam(false);
     refreshReminders();
   }
 
@@ -283,6 +306,120 @@ export default function Dashboard() {
                 </div>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* Exams */}
+      <div className="bg-white rounded-2xl border border-black/8 p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-foreground/80">Exams</h2>
+          <button
+            onClick={() => setAddingExam((v) => !v)}
+            className="text-xs font-mono text-foreground/50 hover:text-foreground/80 transition"
+          >
+            {addingExam ? "Cancel" : "+ Add"}
+          </button>
+        </div>
+
+        {addingExam && (
+          <div className="flex flex-wrap gap-2 mb-4 p-3 bg-black/3 rounded-xl">
+            <input
+              placeholder="Exam name *"
+              value={eTitle}
+              onChange={(e) => setETitle(e.target.value)}
+              className="border border-black/10 px-3 py-1.5 font-mono text-sm bg-white rounded focus:outline-none focus:border-black/30 flex-1 min-w-40"
+            />
+            <input
+              placeholder="Subject (optional)"
+              value={eSubject}
+              onChange={(e) => setESubject(e.target.value)}
+              className="border border-black/10 px-3 py-1.5 font-mono text-sm bg-white rounded focus:outline-none focus:border-black/30 w-44"
+            />
+            <input
+              placeholder="Description (optional)"
+              value={eNotes}
+              onChange={(e) => setENotes(e.target.value)}
+              className="border border-black/10 px-3 py-1.5 font-mono text-sm bg-white rounded focus:outline-none focus:border-black/30 flex-1 min-w-48"
+            />
+            <input
+              placeholder="Resource link (optional)"
+              value={eUrl}
+              onChange={(e) => setEUrl(e.target.value)}
+              className="border border-black/10 px-3 py-1.5 font-mono text-sm bg-white rounded focus:outline-none focus:border-black/30 flex-1 min-w-48"
+            />
+            <input
+              type="date"
+              value={eDeadline}
+              onChange={(e) => setEDeadline(e.target.value)}
+              className="border border-black/10 px-3 py-1.5 font-mono text-sm bg-white rounded focus:outline-none focus:border-black/30"
+            />
+            <button
+              onClick={handleAddExam}
+              className="px-4 py-1.5 bg-black text-white font-mono text-sm rounded hover:opacity-80 transition"
+            >
+              Add →
+            </button>
+          </div>
+        )}
+
+        {reminders.filter((r) => r.type === "EXAM" && !r.completed).length === 0 ? (
+          <p className="text-sm text-foreground/40 py-2">No exams scheduled.</p>
+        ) : (
+          <div className="space-y-2">
+            {reminders
+              .filter((r) => r.type === "EXAM" && !r.completed)
+              .map((r) => {
+                const days = Math.ceil((new Date(r.deadline).getTime() - Date.now()) / 86_400_000);
+                const urgency = days > 14 ? "green" : days > 7 ? "amber" : "orange";
+                const colors = {
+                  green:  { border: "border-emerald-200 bg-emerald-50", badge: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-400" },
+                  amber:  { border: "border-amber-200 bg-amber-50",     badge: "bg-amber-100 text-amber-700",     dot: "bg-amber-400"   },
+                  orange: { border: "border-orange-200 bg-orange-50",   badge: "bg-orange-100 text-orange-700",   dot: "bg-orange-400"  },
+                }[urgency];
+                return (
+                  <div key={r.id} className={`flex items-start gap-3 p-3 rounded-xl border ${colors.border}`}>
+                    <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${colors.dot}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-mono text-foreground/80">{r.title}</p>
+                        {r.subject && (
+                          <span className="text-xs px-2 py-0.5 rounded-full font-mono bg-black/5 text-foreground/50">
+                            {r.subject}
+                          </span>
+                        )}
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-mono font-semibold ${colors.badge}`}>
+                          {days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `${days} days`}
+                        </span>
+                      </div>
+                      {r.notes && <p className="text-xs text-foreground/50 mt-0.5">{r.notes}</p>}
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <p className="text-xs font-mono text-foreground/40">
+                          {new Date(r.deadline).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                        </p>
+                        {r.url && (
+                          <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline font-mono">
+                            Resources →
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => { remindersApi.update(r.id, { completed: true }); refreshReminders(); }}
+                      className="text-xs font-mono text-black/30 hover:text-emerald-500 transition px-1"
+                      title="Mark done"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={() => handleDeleteReminder(r.id)}
+                      className="text-xs font-mono text-black/30 hover:text-red-500 transition px-1"
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })}
           </div>
         )}
       </div>

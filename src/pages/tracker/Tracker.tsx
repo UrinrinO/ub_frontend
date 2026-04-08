@@ -13,6 +13,7 @@ import {
 } from "../../store/trackerSlice";
 import Container from "../../components/layout/Container";
 import WeekFocusSticky from "../../components/ui/WeekFocusSticky";
+import ExamAlerts from "../../components/ui/ExamAlerts";
 import { trackerApi } from "./tracker.api";
 import { getMondayYYYYMMDD } from "./tracker.utils";
 import type { Category, SessionNote } from "./tracker.types";
@@ -363,6 +364,7 @@ export default function Tracker() {
   return (
     <div className="pt-24 pb-20 bg-[#f6f5f2] min-h-screen">
       {prevWeekFocus && <WeekFocusSticky text={prevWeekFocus} />}
+      <ExamAlerts />
 
       {/* REMINDER TOASTS — chat-bubble style, fixed bottom-right */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 pointer-events-none">

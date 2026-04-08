@@ -581,6 +581,54 @@ export default function AdminReport() {
         </div>
       </div>
 
+      {/* IELTS */}
+      <div className="bg-white rounded-2xl border border-black/8 p-6 space-y-4 mb-5">
+        <SectionHeader
+          label="IELTS"
+          mins={sessions?.perCategory["IELTS"]}
+          targetMins={catTarget("IELTS")}
+        />
+        <p className="font-mono text-xs text-black/30 -mt-2">Target: Band 8.0+ · Exam: 24 Apr 2026</p>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Field label="Practice tests completed">
+            <NumberInput
+              value={notes.ieltsTestsDone}
+              onChange={(v) => patch("ieltsTestsDone", v)}
+              placeholder="0"
+            />
+          </Field>
+          <Field label="Score (raw / band)">
+            <TextInput
+              value={notes.ieltsScore ?? ""}
+              onChange={(v) => patch("ieltsScore", v)}
+              placeholder="e.g. 36/40 — Band 8.0"
+            />
+          </Field>
+          <Field label="Weakest section">
+            <TextInput
+              value={notes.ieltsWeakSection ?? ""}
+              onChange={(v) => patch("ieltsWeakSection", v)}
+              placeholder="e.g. Section 3 — TFNG"
+            />
+          </Field>
+          <Field label="Vocabulary added">
+            <NumberInput
+              value={notes.ieltsVocabAdded}
+              onChange={(v) => patch("ieltsVocabAdded", v)}
+              placeholder="0 words"
+            />
+          </Field>
+        </div>
+        <Field label="Notes & reflections">
+          <TextArea
+            value={notes.ieltsNote ?? ""}
+            onChange={(v) => patch("ieltsNote", v)}
+            rows={3}
+            placeholder="What improved, what still needs work..."
+          />
+        </Field>
+      </div>
+
       {/* SYSTEM DESIGN */}
       <div className="bg-white rounded-2xl border border-black/8 p-6 space-y-4 mb-5">
         <SectionHeader

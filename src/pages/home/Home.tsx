@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
-import HeroAudio from "./HeroAudio";
+import { useHeroAudio, HeroAudioPlayer, HeroAudioButton } from "./HeroAudio";
 
 import { motion } from "framer-motion";
 import { fadeUp, fade } from "../../lib/motion";
@@ -43,8 +43,13 @@ const sectionReveal = {
 };
 
 export default function Home() {
+  const audio = useHeroAudio();
+
   return (
     <>
+      {/* Single YouTube player — always mounted, never duplicated */}
+      <HeroAudioPlayer />
+
       {/* HERO */}
       <section className="overflow-hidden">
         {/* ── Desktop ── */}
@@ -105,7 +110,7 @@ export default function Home() {
                   )}
                 </motion.div>
 
-                <HeroAudio playerId="yt-audio-desktop" />
+                <HeroAudioButton {...audio} />
               </div>
 
               {/* Right: portrait with margin from right and bottom */}
@@ -187,7 +192,7 @@ export default function Home() {
               <Button variant="secondary">Book A Call →</Button>
             </motion.div>
             <div className="flex justify-center">
-              <HeroAudio playerId="yt-audio-mobile" />
+              <HeroAudioButton {...audio} />
             </div>
           </div>
         </div>

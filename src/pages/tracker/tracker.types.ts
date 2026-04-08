@@ -92,6 +92,12 @@ export interface ReportNotes {
   // Discipline
   disciplineScore?: number;
   disciplineReasoning?: string;
+  // IELTS
+  ieltsTestsDone?: number;
+  ieltsScore?: string;
+  ieltsWeakSection?: string;
+  ieltsVocabAdded?: number;
+  ieltsNote?: string;
   // Next Week
   nextWeekFocus?: string;
 }
