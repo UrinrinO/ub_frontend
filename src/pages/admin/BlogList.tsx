@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { blogApi, type BlogPost } from "../../lib/adminApi";
 import { RiAddLine, RiEditLine, RiDeleteBinLine, RiStarLine, RiStarFill } from "@remixicon/react";
+import ConfirmationModal from "../../components/ui/ConfirmationModal";
 
 export default function BlogList() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [confirmModal, setConfirmModal] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,10 +33,16 @@ export default function BlogList() {
     );
   }
 
-  async function deletePost(id: string) {
-    if (!confirm("Delete this post? This cannot be undone.")) return;
-    await blogApi.delete(id);
-    setPosts((prev) => prev.filter((p) => p.id !== id));
+  function deletePost(id: string) {
+    setConfirmModal({
+      title: "Delete post?",
+      message: "This will permanently remove the post. This cannot be undone.",
+      onConfirm: async () => {
+        await blogApi.delete(id);
+        setPosts((prev) => prev.filter((p) => p.id !== id));
+        setConfirmModal(null);
+      },
+    });
   }
 
   return (
@@ -141,6 +149,16 @@ export default function BlogList() {
           </table>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={!!confirmModal}
+        title={confirmModal?.title ?? ""}
+        message={confirmModal?.message ?? ""}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => confirmModal?.onConfirm()}
+        onCancel={() => setConfirmModal(null)}
+      />
     </div>
   );
 }

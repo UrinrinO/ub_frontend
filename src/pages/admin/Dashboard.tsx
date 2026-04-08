@@ -4,6 +4,7 @@ import { blogApi, projectsApi, categoryApi, type BlogPost, type Project, type Tr
 import { trackerApi } from "../tracker/tracker.api";
 import { getMondayYYYYMMDD } from "../tracker/tracker.utils";
 import { remindersApi, type Reminder } from "../../lib/reminders.api";
+import ConfirmationModal from "../../components/ui/ConfirmationModal";
 
 function fmtMins(mins: number) {
   const h = Math.floor(mins / 60);
@@ -27,6 +28,9 @@ export default function Dashboard() {
   const [rTitle, setRTitle] = useState("");
   const [rNotes, setRNotes] = useState("");
   const [rDeadline, setRDeadline] = useState("");
+
+  // Confirm modal
+  const [confirmModal, setConfirmModal] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
 
   // Exams
   const [addingExam, setAddingExam] = useState(false);
@@ -73,10 +77,16 @@ export default function Dashboard() {
     refreshCategories();
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this category? This cannot be undone.")) return;
-    await categoryApi.delete(id);
-    refreshCategories();
+  function handleDelete(id: string) {
+    setConfirmModal({
+      title: "Delete category?",
+      message: "This will permanently remove the category. This cannot be undone.",
+      onConfirm: async () => {
+        await categoryApi.delete(id);
+        setConfirmModal(null);
+        refreshCategories();
+      },
+    });
   }
 
   async function handleAddReminder() {
@@ -106,10 +116,16 @@ export default function Dashboard() {
     refreshReminders();
   }
 
-  async function handleDeleteReminder(id: string, label = "reminder") {
-    if (!confirm(`Delete this ${label}? This cannot be undone.`)) return;
-    await remindersApi.delete(id);
-    refreshReminders();
+  function handleDeleteReminder(id: string, label = "reminder") {
+    setConfirmModal({
+      title: `Delete ${label}?`,
+      message: `This will permanently remove the ${label}. This cannot be undone.`,
+      onConfirm: async () => {
+        await remindersApi.delete(id);
+        setConfirmModal(null);
+        refreshReminders();
+      },
+    });
   }
 
   const published = posts.filter((p) => p.published).length;
@@ -491,6 +507,16 @@ export default function Dashboard() {
           </Link>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={!!confirmModal}
+        title={confirmModal?.title ?? ""}
+        message={confirmModal?.message ?? ""}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => confirmModal?.onConfirm()}
+        onCancel={() => setConfirmModal(null)}
+      />
     </div>
   );
 }

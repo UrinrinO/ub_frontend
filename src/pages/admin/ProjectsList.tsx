@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { projectsApi, type Project } from "../../lib/adminApi";
 import { RiAddLine, RiEditLine, RiDeleteBinLine, RiStarLine, RiStarFill } from "@remixicon/react";
+import ConfirmationModal from "../../components/ui/ConfirmationModal";
 
 export default function ProjectsList() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [confirmModal, setConfirmModal] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,10 +23,16 @@ export default function ProjectsList() {
     setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
   }
 
-  async function deleteProject(id: string) {
-    if (!confirm("Delete this project? This cannot be undone.")) return;
-    await projectsApi.delete(id);
-    setProjects((prev) => prev.filter((p) => p.id !== id));
+  function deleteProject(id: string) {
+    setConfirmModal({
+      title: "Delete project?",
+      message: "This will permanently remove the project. This cannot be undone.",
+      onConfirm: async () => {
+        await projectsApi.delete(id);
+        setProjects((prev) => prev.filter((p) => p.id !== id));
+        setConfirmModal(null);
+      },
+    });
   }
 
   return (
@@ -133,6 +141,16 @@ export default function ProjectsList() {
           </table>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={!!confirmModal}
+        title={confirmModal?.title ?? ""}
+        message={confirmModal?.message ?? ""}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => confirmModal?.onConfirm()}
+        onCancel={() => setConfirmModal(null)}
+      />
     </div>
   );
 }

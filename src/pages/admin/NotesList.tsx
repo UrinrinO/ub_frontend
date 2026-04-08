@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { notesApi, type NotesSeries } from "../../lib/adminApi";
 import { RiAddLine, RiEditLine, RiDeleteBinLine, RiArrowRightLine } from "@remixicon/react";
+import ConfirmationModal from "../../components/ui/ConfirmationModal";
 
 export default function NotesList() {
   const [series, setSeries] = useState<NotesSeries[]>([]);
@@ -9,6 +10,7 @@ export default function NotesList() {
   const [newTitle, setNewTitle] = useState("");
   const [newTagline, setNewTagline] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,10 +34,16 @@ export default function NotesList() {
     setSeries((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
   }
 
-  async function deleteSeries(id: string) {
-    if (!confirm("Delete this series and all its parts? This cannot be undone.")) return;
-    await notesApi.deleteSeries(id);
-    setSeries((prev) => prev.filter((s) => s.id !== id));
+  function deleteSeries(id: string) {
+    setConfirmModal({
+      title: "Delete series?",
+      message: "This will permanently remove the series and all its parts. This cannot be undone.",
+      onConfirm: async () => {
+        await notesApi.deleteSeries(id);
+        setSeries((prev) => prev.filter((s) => s.id !== id));
+        setConfirmModal(null);
+      },
+    });
   }
 
   return (
@@ -166,6 +174,16 @@ export default function NotesList() {
           </div>
         ))}
       </div>
+
+      <ConfirmationModal
+        isOpen={!!confirmModal}
+        title={confirmModal?.title ?? ""}
+        message={confirmModal?.message ?? ""}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => confirmModal?.onConfirm()}
+        onCancel={() => setConfirmModal(null)}
+      />
     </div>
   );
 }
