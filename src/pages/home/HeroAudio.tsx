@@ -20,6 +20,7 @@ export function useHeroAudio() {
           onReady: (e: any) => {
             playerRef.current = e.target;
             e.target.seekTo(77.20, true);
+            e.target.pauseVideo();
             setReady(true);
           },
           onStateChange: (e: any) => setPlaying(e.data === 1),
