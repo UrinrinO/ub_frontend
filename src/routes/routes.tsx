@@ -34,6 +34,8 @@ import TrackerView from "../pages/admin/TrackerView";
 import AdminReport from "../pages/admin/AdminReport";
 import NotesList from "../pages/admin/NotesList";
 import PartEditor from "../pages/admin/PartEditor";
+import ResourcesList from "../pages/admin/ResourcesList";
+import ResourceEditor from "../pages/admin/ResourceEditor";
 
 export default function AppRoutes() {
   return (
@@ -100,8 +102,12 @@ export default function AppRoutes() {
         <Route path="notes" element={<NotesList />} />
         <Route path="notes/:seriesId/parts/new" element={<PartEditor />} />
         <Route path="notes/:seriesId/parts/:partId" element={<PartEditor />} />
+        <Route path="resources" element={<ResourcesList />} />
+        <Route path="resources/new" element={<ResourceEditor />} />
+        <Route path="resources/:id" element={<ResourceEditor />} />
       </Route>
     </Routes>
+
     </>
   );
 }

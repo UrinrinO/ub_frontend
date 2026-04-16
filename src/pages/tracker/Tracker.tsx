@@ -20,6 +20,7 @@ import type { Category, SessionNote } from "./tracker.types";
 import { remindersApi, type Reminder } from "../../lib/reminders.api";
 import ClockOutForm from "./ClockOutForm";
 import { usePiP } from "./usePiP";
+import ResourcesTab from "./ResourcesTab";
 
 /* ---------- CONSTANTS ---------- */
 
@@ -65,6 +66,8 @@ export default function Tracker() {
     previousMinutes: number;
     newMinutes: number;
   } | null>(null);
+
+  const [tab, setTab] = useState<"tracker" | "resources">("tracker");
 
   const { openPiP, isPiPOpen } = usePiP();
   const toast = useToast();
@@ -436,7 +439,7 @@ export default function Tracker() {
         )}
 
         {/* HEADER */}
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between mb-6">
           <div className="space-y-2">
             <h1 className="font-display text-6xl leading-none text-black">
               Deep Work
@@ -446,7 +449,7 @@ export default function Tracker() {
             </p>
           </div>
 
-          {status !== "IDLE" && (
+          {status !== "IDLE" && tab === "tracker" && (
             <button
               onClick={openPiP}
               className="flex items-center gap-2 px-4 py-2 border border-black/15 font-mono text-xs uppercase tracking-widest text-black/50 hover:border-black/40 hover:text-black transition"
@@ -455,6 +458,35 @@ export default function Tracker() {
             </button>
           )}
         </div>
+
+        {/* TAB BAR */}
+        <div className="flex gap-1 mb-10 border-b border-black/10">
+          <button
+            onClick={() => setTab("tracker")}
+            className={`px-4 py-2 font-mono text-xs uppercase tracking-widest transition border-b-2 -mb-px ${
+              tab === "tracker"
+                ? "border-black text-black"
+                : "border-transparent text-black/40 hover:text-black/60"
+            }`}
+          >
+            Sessions
+          </button>
+          <button
+            onClick={() => setTab("resources")}
+            className={`px-4 py-2 font-mono text-xs uppercase tracking-widest transition border-b-2 -mb-px ${
+              tab === "resources"
+                ? "border-black text-black"
+                : "border-transparent text-black/40 hover:text-black/60"
+            }`}
+          >
+            Resources
+          </button>
+        </div>
+
+        {tab === "resources" ? (
+          <ResourcesTab />
+        ) : (
+        <>
 
         {/* TOP GRID */}
         <div className="grid lg:grid-cols-[3fr_1.4fr] gap-8">
@@ -789,6 +821,8 @@ export default function Tracker() {
               </div>
             </div>
           </div>
+        )}
+        </>
         )}
       </Container>
     </div>

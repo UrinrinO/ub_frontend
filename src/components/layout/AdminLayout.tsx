@@ -8,6 +8,7 @@ import {
   RiFileList3Line,
   RiArrowLeftLine,
   RiBookOpenLine,
+  RiBookmarkLine,
 } from "@remixicon/react";
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { to: "/admin/notes", label: "Eng. Notes", icon: RiBookOpenLine, end: false },
   { to: "/admin/tracker", label: "Tracker", icon: RiTimeLine, end: false },
   { to: "/admin/report", label: "Report", icon: RiFileList3Line, end: false },
+  { to: "/admin/resources", label: "Resources", icon: RiBookmarkLine, end: false },
 ];
 
 export default function AdminLayout() {
