@@ -202,9 +202,10 @@ export default function WeeklyReport() {
   const [weekStart, setWeekStart] = useState(getMondayYYYYMMDD);
   const [week, setWeek] = useState<WeekReport | null>(null);
   const [report, setReport] = useState<StoredWeeklyReport | null>(null);
-  const [tab, setTab] = useState<"tracker" | "summation" | "exams">("tracker");
+  const [tab, setTab] = useState<"tracker" | "summation" | "exams" | "counts">("tracker");
   const [exams, setExams] = useState<Reminder[]>([]);
   const [categories, setCategories] = useState<TrackerCategory[]>([]);
+  const [allTimeStats, setAllTimeStats] = useState<{totalMinutes: number; perCategory: Record<string, number>} | null>(null);
   const [activeSession, setActiveSession] = useState<import("./tracker.types").WorkSession | null | undefined>(undefined);
   const [lastEndedAt, setLastEndedAt] = useState<string | null>(null);
   const [prevWeekFocus, setPrevWeekFocus] = useState<string | null>(null);
@@ -212,6 +213,7 @@ export default function WeeklyReport() {
   useEffect(() => {
     trackerApi.getCategories().then(setCategories).catch(console.error);
     remindersApi.list().then((all) => setExams(all.filter((r) => r.type === "EXAM" && !r.completed))).catch(console.error);
+    trackerApi.getAllTimeStats().then(setAllTimeStats).catch(console.error);
   }, []);
 
   /* Load previous week's next-week focus for sticky */
@@ -358,6 +360,16 @@ export default function WeeklyReport() {
               </span>
             )}
           </button>
+          <button
+            onClick={() => setTab("counts")}
+            className={`px-4 py-2 font-mono text-xs uppercase tracking-widest transition border-b-2 -mb-px ${
+              tab === "counts"
+                ? "border-black text-black"
+                : "border-transparent text-black/40 hover:text-black/60"
+            }`}
+          >
+            Counts
+          </button>
         </div>
 
         {tab === "exams" ? (
@@ -414,6 +426,49 @@ export default function WeeklyReport() {
                 })
             )}
           </div>
+        ) : tab === "counts" ? (
+          !allTimeStats ? (
+            <p className="font-mono text-sm text-black/40">Loading…</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-4 mb-4">
+                <div className="border border-black/10 bg-white p-6">
+                  <p className="font-mono text-xs uppercase tracking-widest text-black/40 mb-2">
+                    Total Time All Activities
+                  </p>
+                  <p className="font-display text-4xl leading-none">
+                    {(allTimeStats.totalMinutes / 60).toFixed(1)} <span className="text-black/30 text-2xl">hours</span>
+                  </p>
+                </div>
+              </div>
+              <div className="border border-black/10 bg-white p-8 mb-8">
+                <p className="font-mono text-xs uppercase tracking-widest text-black/40 mb-6">
+                  By Category
+                </p>
+                <div className="space-y-4">
+                  {Object.entries(allTimeStats.perCategory)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([key, mins]) => {
+                      const cat = categories.find((c) => c.key === key);
+                      const label = cat?.label ?? key.replaceAll("_", " ");
+                      if (!mins) return null;
+                      const pct = Math.min(100, (mins / allTimeStats.totalMinutes) * 100);
+                      return (
+                        <div key={key}>
+                          <div className="flex justify-between font-mono text-xs text-black/50 mb-1.5">
+                            <span>{label}</span>
+                            <span>{fmtMins(mins)} ({(mins / 60).toFixed(1)}h)</span>
+                          </div>
+                          <div className="h-0.5 bg-black/10">
+                            <div className="h-full bg-black" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            </>
+          )
         ) : tab === "summation" ? (
           !week && !report ? (
             <p className="font-mono text-sm text-black/40">Loading…</p>

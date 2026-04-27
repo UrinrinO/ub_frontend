@@ -23,6 +23,12 @@ export const trackerApi = {
     );
   },
 
+  getAllTimeStats() {
+    return fetch(`${API_URL}/api/tracker/all-time`).then((res) =>
+      json<{ totalMinutes: number; perCategory: Record<string, number> }>(res),
+    );
+  },
+
   getWeek(start: string) {
     return fetch(`${API_URL}/api/tracker/week?start=${start}`).then((res) =>
       json<WeekReport>(res),
