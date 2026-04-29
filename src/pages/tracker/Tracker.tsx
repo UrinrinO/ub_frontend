@@ -258,14 +258,7 @@ export default function Tracker() {
       return;
     }
 
-    const delta = minutes - editingCurrentMinutes;
-    const maxDelta = 60;
-    if (Math.abs(delta) > maxDelta) {
-      toast.error(`Adjustment must be within ±${maxDelta} minutes.`);
-      return;
-    }
-
-    const minAllowed = Math.max(1, editingCurrentMinutes - maxDelta);
+    const minAllowed = 1;
     if (minutes < minAllowed) {
       toast.error(`Minimum allowed is ${minAllowed} minutes.`);
       return;
@@ -781,7 +774,7 @@ export default function Tracker() {
                   className="w-full border border-black/15 px-3 py-2 text-sm font-mono focus:outline-none focus:border-black/40"
                 />
                 <p className="text-xs text-black/40">
-                  Adjust within ±60 minutes from current value.
+                  Enter the total correct duration in minutes.
                 </p>
               </div>
 
